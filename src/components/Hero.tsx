@@ -23,7 +23,7 @@ const Hero = () => {
   }, []);
 
   const initThreeScene = useCallback(() => {
-    const THREE = window.THREE;
+    const THREE = getThree();
     if (!THREE || !canvasContainerRef.current) return;
 
     const container = canvasContainerRef.current;
