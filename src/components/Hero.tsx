@@ -169,7 +169,7 @@ const Hero = () => {
 
   useEffect(() => {
     if (isMobile) return;
-    if (!window.THREE) {
+    if (!getThree()) {
       const script = document.createElement("script");
       script.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
       script.onload = () => {
