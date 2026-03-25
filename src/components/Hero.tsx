@@ -7,11 +7,8 @@ const fadeUp = (delay: number) => ({
   transition: { duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] },
 });
 
-declare global {
-  interface Window {
-    THREE: typeof import("three") | undefined;
-  }
-}
+// THREE is loaded from CDN
+
 
 const Hero = () => {
   const canvasContainerRef = useRef<HTMLDivElement>(null);
