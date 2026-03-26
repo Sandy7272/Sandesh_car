@@ -9,7 +9,7 @@ const TITLES = [
   "Motion Designer",
   "Creative Developer",
 ];
-
+//services
 const scrollToId = (id: string) => {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 };
