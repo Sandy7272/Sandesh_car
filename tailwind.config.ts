@@ -60,6 +60,7 @@ export default {
       },
       fontFamily: {
         display: ['Instrument Serif', 'serif'],
+        hero: ['Outfit', 'sans-serif'],
         body: ['DM Sans', 'sans-serif'],
         mono: ['DM Mono', 'monospace'],
       },

@@ -1,20 +1,56 @@
+import { useEffect, useRef, useState } from "react";
+
+const AnimatedSection = ({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) setVisible(true); },
+      { threshold: 0.15 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={className}
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: visible ? "translateY(0)" : "translateY(50px)",
+        filter: visible ? "blur(0px)" : "blur(6px)",
+        transition: "all 0.9s cubic-bezier(0.22, 1, 0.36, 1)",
+      }}
+    >
+      {children}
+    </div>
+  );
+};
+
 const About = () => (
   <section id="about" className="section-padding">
     <div className="container-custom grid grid-cols-1 lg:grid-cols-[40%_60%] gap-12 lg:gap-16 relative">
       {/* Left */}
-      <div className="relative">
+      <AnimatedSection className="relative">
         <p className="section-label mb-4">About</p>
         <h2 className="section-heading text-foreground">About Me</h2>
-        {/* Background text */}
-        <p
-          className="absolute top-1/2 left-0 -translate-y-1/2 font-display italic text-[8rem] lg:text-[12rem] text-foreground/[0.04] leading-none pointer-events-none select-none whitespace-nowrap"
-        >
+        <p className="absolute top-1/2 left-0 -translate-y-1/2 font-display italic text-[8rem] lg:text-[12rem] text-foreground/[0.04] leading-none pointer-events-none select-none whitespace-nowrap">
           SANDESH
         </p>
-      </div>
+      </AnimatedSection>
 
       {/* Right */}
-      <div className="space-y-6">
+      <AnimatedSection className="space-y-6" style-delay="150ms">
         <p className="font-body text-[15px] text-muted-foreground leading-[1.9]">
           I'm Sandesh Gadakh — a 3D Artist, Motion Designer, and Creative Technologist based in Pune, India.
           I don't just design; I engineer experiences end to end.
@@ -41,7 +77,7 @@ const About = () => (
         >
           Let's work together →
         </a>
-      </div>
+      </AnimatedSection>
     </div>
   </section>
 );
