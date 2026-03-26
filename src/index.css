@@ -76,7 +76,7 @@ body::before {
   z-index: 9998;
 }
 
-/* Subtle background gradient orb */
+/* Subtle background gradient orbs — hybrid orange + purple/blue */
 body::after {
   content: '';
   position: fixed;
@@ -86,6 +86,19 @@ body::after {
   height: 60vw;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255,69,0,0.03) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Secondary purple/blue glow */
+.glow-purple {
+  position: fixed;
+  top: 60vh;
+  left: -15vw;
+  width: 50vw;
+  height: 50vw;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(120,80,255,0.025) 0%, rgba(60,130,255,0.01) 40%, transparent 70%);
   pointer-events: none;
   z-index: -1;
 }

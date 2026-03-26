@@ -1,273 +1,240 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
+
+const FRAME_COUNT = 120;
+const frames: HTMLImageElement[] = [];
+
+const getFramePath = (index: number) =>
+  `/sequence/frame_${String(index).padStart(3, "0")}_delay-0.066s.png`;
 
 const fadeUp = (delay: number) => ({
-  initial: { opacity: 0, y: 24 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] },
+  initial: { opacity: 0, y: 30, filter: "blur(8px)" },
+  animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+  transition: { duration: 0.9, delay, ease: [0.22, 1, 0.36, 1] },
 });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getThree = (): any => (window as any).THREE;
-
-
 const Hero = () => {
-  const canvasContainerRef = useRef<HTMLDivElement>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [loaded, setLoaded] = useState(false);
+  const currentFrame = useRef(0);
 
+  // Preload all frames
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
+    let loadedCount = 0;
+    for (let i = 0; i < FRAME_COUNT; i++) {
+      const img = new Image();
+      img.src = getFramePath(i);
+      img.onload = () => {
+        loadedCount++;
+        if (loadedCount === FRAME_COUNT) setLoaded(true);
+      };
+      img.onerror = () => {
+        loadedCount++;
+        if (loadedCount === FRAME_COUNT) setLoaded(true);
+      };
+      frames[i] = img;
+    }
   }, []);
 
-  const initThreeScene = useCallback(() => {
-    const THREE = getThree();
-    if (!THREE || !canvasContainerRef.current) return;
+  // Draw frame on canvas
+  const drawFrame = (index: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const img = frames[index];
+    if (!img || !img.complete) return;
 
-    const container = canvasContainerRef.current;
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    canvas.width = window.innerWidth * Math.min(window.devicePixelRatio, 2);
+    canvas.height = window.innerHeight * Math.min(window.devicePixelRatio, 2);
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
-    camera.position.set(0, 0, 7);
+    const scale = Math.max(
+      canvas.width / img.naturalWidth,
+      canvas.height / img.naturalHeight
+    );
+    const x = (canvas.width - img.naturalWidth * scale) / 2;
+    const y = (canvas.height - img.naturalHeight * scale) / 2;
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    container.innerHTML = "";
-    container.appendChild(renderer.domElement);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, x, y, img.naturalWidth * scale, img.naturalHeight * scale);
+  };
 
-    // Sphere group offset to right-centre
-    const sphereGroup = new THREE.Group();
-    sphereGroup.position.x = 1.8;
-    scene.add(sphereGroup);
+  // GSAP ScrollTrigger for image sequence
+  useEffect(() => {
+    if (!loaded || !sectionRef.current || !canvasRef.current) return;
 
-    // Main icosahedron
-    const icoGeo = new THREE.IcosahedronGeometry(1.4, 4);
-    const icoMat = new THREE.MeshPhongMaterial({
-      color: 0x111111,
-      emissive: 0xff4400,
-      emissiveIntensity: 0.08,
-      shininess: 220,
-      transparent: true,
-      opacity: 0.92,
-    });
-    const ico = new THREE.Mesh(icoGeo, icoMat);
-    sphereGroup.add(ico);
+    drawFrame(0);
 
-    // Wireframe shell
-    const wireGeo = new THREE.IcosahedronGeometry(1.55, 2);
-    const wireMat = new THREE.MeshBasicMaterial({
-      color: 0xff4400,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.12,
-    });
-    sphereGroup.add(new THREE.Mesh(wireGeo, wireMat));
-
-    // Orbital rings
-    const rings = [
-      { radius: 1.65, color: 0xff4400, opacity: 0.3, rotX: 0.8, rotZ: 0.3 },
-      { radius: 2.2, color: 0xffffff, opacity: 0.08, rotX: -0.4, rotZ: 1.2 },
-      { radius: 2.8, color: 0x4488ff, opacity: 0.05, rotX: 1.5, rotZ: -0.6 },
-    ];
-    const ringMeshes = rings.map((r) => {
-      const geo = new THREE.TorusGeometry(r.radius, 0.008, 16, 100);
-      const mat = new THREE.MeshBasicMaterial({ color: r.color, transparent: true, opacity: r.opacity });
-      const mesh = new THREE.Mesh(geo, mat);
-      mesh.rotation.x = r.rotX;
-      mesh.rotation.z = r.rotZ;
-      sphereGroup.add(mesh);
-      return mesh;
+    const obj = { frame: 0 };
+    const tl = gsap.to(obj, {
+      frame: FRAME_COUNT - 1,
+      snap: "frame",
+      ease: "none",
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: "top top",
+        end: "+=300%",
+        pin: true,
+        scrub: 0.5,
+      },
+      onUpdate: () => {
+        const newFrame = Math.round(obj.frame);
+        if (newFrame !== currentFrame.current) {
+          currentFrame.current = newFrame;
+          drawFrame(newFrame);
+        }
+      },
     });
 
-    // Particle cloud
-    const particleCount = 2500;
-    const positions = new Float32Array(particleCount * 3);
-    const colors = new Float32Array(particleCount * 3);
-    const orangeColor = new THREE.Color(0xff4400);
-    const whiteColor = new THREE.Color(0xffffff);
-    for (let i = 0; i < particleCount; i++) {
-      const r = 3.5 * Math.cbrt(Math.random());
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-      positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-      positions[i * 3 + 2] = r * Math.cos(phi);
-      const c = Math.random() > 0.7 ? orangeColor : whiteColor;
-      colors[i * 3] = c.r;
-      colors[i * 3 + 1] = c.g;
-      colors[i * 3 + 2] = c.b;
-    }
-    const particleGeo = new THREE.BufferGeometry();
-    particleGeo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    particleGeo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-    const particleMat = new THREE.PointsMaterial({ size: 0.03, vertexColors: true, transparent: true, opacity: 0.6 });
-    sphereGroup.add(new THREE.Points(particleGeo, particleMat));
-
-    // Lighting
-    scene.add(new THREE.AmbientLight(0xffffff, 0.3));
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    dirLight.position.set(5, 5, 5);
-    scene.add(dirLight);
-    const pointLight = new THREE.PointLight(0xff4400, 0.5, 10);
-    pointLight.position.set(-3, 2, 4);
-    scene.add(pointLight);
-
-    // Mouse parallax
-    let targetX = 0, targetY = 0;
-    const onMouseMove = (e: MouseEvent) => {
-      targetX = (e.clientX / window.innerWidth - 0.5) * 0.4;
-      targetY = (e.clientY / window.innerHeight - 0.5) * 0.4;
-    };
-    window.addEventListener("mousemove", onMouseMove);
-
-    // Resize
-    const onResize = () => {
-      if (!container.clientWidth) return;
-      camera.aspect = container.clientWidth / container.clientHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(container.clientWidth, container.clientHeight);
-    };
+    const onResize = () => drawFrame(currentFrame.current);
     window.addEventListener("resize", onResize);
 
-    // Animate
-    let animId: number;
-    const clock = new THREE.Clock();
-    const animate = () => {
-      animId = requestAnimationFrame(animate);
-      const t = clock.getElapsedTime();
-
-      if (!reducedMotion) {
-        ico.rotation.y = t * 0.15;
-        ico.rotation.x = t * 0.08;
-        sphereGroup.position.y = Math.sin(t * 0.6) * 0.1;
-
-        ringMeshes.forEach((ring, i) => {
-          ring.rotation.z += 0.001 * (i % 2 === 0 ? 1 : -1);
-        });
-
-        camera.position.x += (targetX - camera.position.x) * 0.02;
-        camera.position.y += (-targetY - camera.position.y) * 0.02;
-        camera.lookAt(sphereGroup.position);
-      }
-
-      renderer.render(scene, camera);
-    };
-    animate();
-
     return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener("mousemove", onMouseMove);
+      tl.kill();
+      ScrollTrigger.getAll().forEach((t) => t.kill());
       window.removeEventListener("resize", onResize);
-      renderer.dispose();
-      container.innerHTML = "";
     };
-  }, []);
-
-  useEffect(() => {
-    if (isMobile) return;
-    if (!getThree()) {
-      const script = document.createElement("script");
-      script.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
-      script.onload = () => {
-        const cleanup = initThreeScene();
-        return cleanup;
-      };
-      document.head.appendChild(script);
-    } else {
-      const cleanup = initThreeScene();
-      return cleanup;
-    }
-  }, [isMobile, initThreeScene]);
+  }, [loaded]);
 
   return (
-    <section className="min-h-screen flex items-center section-padding">
-      <div className="container-custom grid grid-cols-1 lg:grid-cols-[55%_45%] gap-12 lg:gap-8 items-center">
-        {/* Left column */}
-        <div className="space-y-8">
-          <motion.div {...fadeUp(0)} className="flex items-center gap-2 font-mono-custom text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
-            Available for work <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-blink" />
-          </motion.div>
+    <div ref={sectionRef} className="relative h-screen w-full overflow-hidden">
+      {/* Canvas background */}
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full"
+        style={{ opacity: loaded ? 1 : 0, transition: "opacity 0.8s ease" }}
+      />
 
-          <div>
-            <motion.h1
-              {...fadeUp(0.08)}
-              className="font-display italic text-foreground leading-[0.95]"
-              style={{ fontSize: "clamp(4rem, 10vw, 9rem)" }}
+      {/* Gradient overlays */}
+      <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/50 to-transparent z-10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/40 z-10" />
+
+      {/* Purple/blue ambient glow */}
+      <div
+        className="absolute top-1/4 right-1/4 w-[60vw] h-[60vw] rounded-full z-[5] pointer-events-none"
+        style={{
+          background: "radial-gradient(circle, rgba(120,80,255,0.06) 0%, rgba(60,130,255,0.03) 40%, transparent 70%)",
+          filter: "blur(60px)",
+        }}
+      />
+
+      {/* Content overlay */}
+      <div className="absolute inset-0 z-20 flex items-center">
+        <div className="container-custom">
+          <div className="max-w-2xl space-y-8">
+            <motion.div
+              {...fadeUp(0)}
+              className="flex items-center gap-3 font-mono-custom text-[11px] uppercase tracking-[0.2em] text-muted-foreground"
             >
-              Sandesh
-            </motion.h1>
-            <motion.h1
-              {...fadeUp(0.16)}
-              className="font-display italic text-primary leading-[0.95]"
-              style={{ fontSize: "clamp(4rem, 10vw, 9rem)" }}
+              <span className="inline-block w-8 h-[1px] bg-primary" />
+              Available for work
+              <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-blink" />
+            </motion.div>
+
+            <div>
+              <motion.h1
+                {...fadeUp(0.1)}
+                className="font-display italic text-foreground leading-[0.92] tracking-tight"
+                style={{ fontSize: "clamp(3.5rem, 8vw, 7rem)" }}
+              >
+                Sandesh
+              </motion.h1>
+              <motion.h1
+                {...fadeUp(0.2)}
+                className="font-display italic text-primary leading-[0.92] tracking-tight"
+                style={{ fontSize: "clamp(3.5rem, 8vw, 7rem)" }}
+              >
+                Gadakh.
+              </motion.h1>
+            </div>
+
+            <motion.p
+              {...fadeUp(0.3)}
+              className="font-mono-custom text-[13px] uppercase tracking-[0.12em] text-muted-foreground"
             >
-              Gadakh.
-            </motion.h1>
+              Creative Technologist · 3D Product Builder
+            </motion.p>
+
+            <motion.p
+              {...fadeUp(0.35)}
+              className="font-body text-base text-muted-foreground/80 max-w-lg leading-relaxed"
+            >
+              Building AI-powered 3D systems, cinematic experiences, and scalable pipelines
+            </motion.p>
+
+            <motion.div {...fadeUp(0.45)} className="flex flex-wrap gap-4 pt-2">
+              <a
+                href="#work"
+                className="group inline-flex items-center gap-2 font-mono-custom text-[12px] uppercase tracking-[0.15em] bg-primary text-primary-foreground px-8 py-4 rounded-full hover:brightness-110 transition-smooth"
+              >
+                View Work
+                <span className="inline-block transition-transform group-hover:translate-x-1">→</span>
+              </a>
+              <a
+                href="#contact"
+                className="inline-flex items-center font-mono-custom text-[12px] uppercase tracking-[0.15em] border border-foreground/[0.15] text-foreground px-8 py-4 rounded-full hover:border-primary hover:text-primary transition-smooth backdrop-blur-sm"
+              >
+                Let's Talk
+              </a>
+            </motion.div>
+
+            {/* Stats row */}
+            <motion.div
+              {...fadeUp(0.55)}
+              className="flex items-center gap-0 font-mono-custom text-[11px] uppercase tracking-[0.15em] pt-4"
+            >
+              {[
+                { num: "4+", label: "Years" },
+                { num: "50+", label: "Projects" },
+                { num: "3×", label: "Best Employee" },
+              ].map((stat, i) => (
+                <div
+                  key={i}
+                  className={`flex flex-col gap-1 ${i > 0 ? "border-l border-foreground/[0.07] pl-6 ml-6" : ""}`}
+                >
+                  <span className="text-foreground text-lg font-display italic">{stat.num}</span>
+                  <span className="text-muted-foreground">{stat.label}</span>
+                </div>
+              ))}
+            </motion.div>
           </div>
-
-          <motion.p {...fadeUp(0.24)} className="font-body text-base text-muted-foreground max-w-md leading-relaxed">
-            3D Artist & Creative Technologist. Building immersive spatial experiences — from Gaussian Splatting to real-time AR/VR.
-          </motion.p>
-
-          <motion.div {...fadeUp(0.32)} className="flex flex-wrap gap-4">
-            <a
-              href="#work"
-              className="inline-flex items-center font-mono-custom text-[12px] uppercase tracking-[0.15em] bg-primary text-primary-foreground px-7 py-3.5 rounded-full hover:brightness-110 transition-smooth"
-            >
-              View Work →
-            </a>
-            <a
-              href="#"
-              className="inline-flex items-center font-mono-custom text-[12px] uppercase tracking-[0.15em] border border-foreground/[0.15] text-foreground px-7 py-3.5 rounded-full hover:border-primary hover:text-primary transition-smooth"
-            >
-              Download CV
-            </a>
-          </motion.div>
-
-          <motion.div {...fadeUp(0.4)} className="flex items-center gap-0 font-mono-custom text-[11px] uppercase tracking-[0.15em]">
-            {[
-              { num: "4+", label: "Years" },
-              { num: "50+", label: "Projects" },
-              { num: "3×", label: "Best Employee" },
-            ].map((stat, i) => (
-              <div key={i} className={`flex flex-col gap-1 ${i > 0 ? "border-l border-foreground/[0.07] pl-6 ml-6" : ""}`}>
-                <span className="text-foreground text-lg font-display italic">{stat.num}</span>
-                <span className="text-muted-foreground">{stat.label}</span>
-              </div>
-            ))}
-          </motion.div>
         </div>
-
-        {/* Right column — 3D scene or fallback */}
-        <motion.div
-          {...fadeUp(0.3)}
-          className="relative overflow-hidden rounded-lg aspect-[4/5] lg:aspect-[3/4]"
-        >
-          {isMobile ? (
-            <>
-              <div
-                className="absolute inset-0"
-                style={{ background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)" }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent z-10" />
-              <div className="absolute top-4 right-4 z-20">
-                <span className="pill">2024</span>
-              </div>
-              <div className="absolute bottom-6 left-6 right-6 z-20">
-                <p className="font-body text-foreground text-lg mb-2">L&T Realty Virtual Tour</p>
-                <span className="pill">Real Estate · 3D</span>
-              </div>
-            </>
-          ) : (
-            <div ref={canvasContainerRef} className="absolute inset-0" />
-          )}
-        </motion.div>
       </div>
-    </section>
+
+      {/* Loading state */}
+      {!loaded && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-background">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+            <p className="font-mono-custom text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
+              Loading Experience
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Scroll indicator */}
+      {loaded && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5 }}
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2"
+        >
+          <span className="font-mono-custom text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
+            Scroll
+          </span>
+          <div className="w-[1px] h-8 bg-gradient-to-b from-primary/60 to-transparent" />
+        </motion.div>
+      )}
+    </div>
   );
 };
 
