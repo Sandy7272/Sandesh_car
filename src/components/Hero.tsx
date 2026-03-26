@@ -23,7 +23,6 @@ const Hero = () => {
   const [loaded, setLoaded] = useState(false);
   const currentFrame = useRef(0);
 
-  // Preload all frames
   useEffect(() => {
     let loadedCount = 0;
     for (let i = 0; i < FRAME_COUNT; i++) {
@@ -41,7 +40,6 @@ const Hero = () => {
     }
   }, []);
 
-  // Draw frame on canvas
   const drawFrame = (index: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -66,7 +64,6 @@ const Hero = () => {
     ctx.drawImage(img, x, y, img.naturalWidth * scale, img.naturalHeight * scale);
   };
 
-  // GSAP ScrollTrigger for image sequence
   useEffect(() => {
     if (!loaded || !sectionRef.current || !canvasRef.current) return;
 
@@ -112,103 +109,69 @@ const Hero = () => {
         style={{ opacity: loaded ? 1 : 0, transition: "opacity 0.8s ease" }}
       />
 
-      {/* Gradient overlays */}
-      <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/50 to-transparent z-10" />
-      <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/40 z-10" />
+      {/* Overlays */}
+      <div className="absolute inset-0 bg-background/60 z-10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/50 z-10" />
 
-      {/* Purple/blue ambient glow */}
-      <div
-        className="absolute top-1/4 right-1/4 w-[60vw] h-[60vw] rounded-full z-[5] pointer-events-none"
-        style={{
-          background: "radial-gradient(circle, rgba(120,80,255,0.06) 0%, rgba(60,130,255,0.03) 40%, transparent 70%)",
-          filter: "blur(60px)",
-        }}
-      />
-
-      {/* Content overlay */}
-      <div className="absolute inset-0 z-20 flex items-center">
-        <div className="container-custom">
-          <div className="max-w-2xl space-y-8">
-            <motion.div
-              {...fadeUp(0)}
-              className="flex items-center gap-3 font-mono-custom text-[11px] uppercase tracking-[0.2em] text-muted-foreground"
-            >
-              <span className="inline-block w-8 h-[1px] bg-primary" />
-              Available for work
-              <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-blink" />
-            </motion.div>
-
-            <div>
-              <motion.h1
-                {...fadeUp(0.1)}
-                className="font-display italic text-foreground leading-[0.92] tracking-tight"
-                style={{ fontSize: "clamp(3.5rem, 8vw, 7rem)" }}
-              >
-                Sandesh
-              </motion.h1>
-              <motion.h1
-                {...fadeUp(0.2)}
-                className="font-display italic text-primary leading-[0.92] tracking-tight"
-                style={{ fontSize: "clamp(3.5rem, 8vw, 7rem)" }}
-              >
-                Gadakh.
-              </motion.h1>
-            </div>
-
-            <motion.p
-              {...fadeUp(0.3)}
-              className="font-mono-custom text-[13px] uppercase tracking-[0.12em] text-muted-foreground"
-            >
-              Creative Technologist · 3D Product Builder
-            </motion.p>
-
-            <motion.p
-              {...fadeUp(0.35)}
-              className="font-body text-base text-muted-foreground/80 max-w-lg leading-relaxed"
-            >
-              Building AI-powered 3D systems, cinematic experiences, and scalable pipelines
-            </motion.p>
-
-            <motion.div {...fadeUp(0.45)} className="flex flex-wrap gap-4 pt-2">
-              <a
-                href="#work"
-                className="group inline-flex items-center gap-2 font-mono-custom text-[12px] uppercase tracking-[0.15em] bg-primary text-primary-foreground px-8 py-4 rounded-full hover:brightness-110 transition-smooth"
-              >
-                View Work
-                <span className="inline-block transition-transform group-hover:translate-x-1">→</span>
-              </a>
-              <a
-                href="#contact"
-                className="inline-flex items-center font-mono-custom text-[12px] uppercase tracking-[0.15em] border border-foreground/[0.15] text-foreground px-8 py-4 rounded-full hover:border-primary hover:text-primary transition-smooth backdrop-blur-sm"
-              >
-                Let's Talk
-              </a>
-            </motion.div>
-
-            {/* Stats row */}
-            <motion.div
-              {...fadeUp(0.55)}
-              className="flex items-center gap-0 font-mono-custom text-[11px] uppercase tracking-[0.15em] pt-4"
-            >
-              {[
-                { num: "4+", label: "Years" },
-                { num: "50+", label: "Projects" },
-                { num: "3×", label: "Best Employee" },
-              ].map((stat, i) => (
-                <div
-                  key={i}
-                  className={`flex flex-col gap-1 ${i > 0 ? "border-l border-foreground/[0.07] pl-6 ml-6" : ""}`}
-                >
-                  <span className="text-foreground text-lg font-display italic">{stat.num}</span>
-                  <span className="text-muted-foreground">{stat.label}</span>
-                </div>
-              ))}
-            </motion.div>
+      {/* Content — centered like reference */}
+      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center">
+        {/* Currently at badge */}
+        <motion.div
+          {...fadeUp(0)}
+          className="flex items-center gap-3 mb-10"
+        >
+          <div className="w-10 h-10 rounded-full bg-card border border-foreground/10 flex items-center justify-center overflow-hidden">
+            <span className="font-display italic text-sm text-foreground">S</span>
           </div>
-        </div>
+          <div className="text-left">
+            <p className="font-body text-[12px] text-muted-foreground leading-tight">Currently at</p>
+            <p className="font-hero text-[15px] text-foreground font-black leading-tight">MetaShop AI.</p>
+          </div>
+        </motion.div>
+
+        {/* Giant name */}
+        <motion.h1
+          {...fadeUp(0.1)}
+          className="font-hero font-black text-foreground leading-[0.88] lowercase tracking-tight"
+          style={{ fontSize: "clamp(4rem, 14vw, 13rem)" }}
+        >
+          sandesh
+        </motion.h1>
+        <motion.h1
+          {...fadeUp(0.2)}
+          className="font-hero font-black text-foreground leading-[0.88] lowercase tracking-tight"
+          style={{ fontSize: "clamp(4rem, 14vw, 13rem)" }}
+        >
+          gadakh
+        </motion.h1>
+
+        {/* Role */}
+        <motion.p
+          {...fadeUp(0.3)}
+          className="font-body text-lg md:text-xl text-muted-foreground mt-6"
+        >
+          Creative Technologist · 3D Product Builder
+        </motion.p>
+
+        {/* CTAs */}
+        <motion.div {...fadeUp(0.45)} className="flex flex-wrap justify-center gap-4 mt-10">
+          <a
+            href="#work"
+            className="group inline-flex items-center gap-2 font-mono-custom text-[12px] uppercase tracking-[0.15em] bg-primary text-primary-foreground px-8 py-4 rounded-full hover:brightness-110 transition-smooth"
+          >
+            View Work
+            <span className="inline-block transition-transform group-hover:translate-x-1">→</span>
+          </a>
+          <a
+            href="#contact"
+            className="inline-flex items-center font-mono-custom text-[12px] uppercase tracking-[0.15em] border border-foreground/[0.15] text-foreground px-8 py-4 rounded-full hover:border-primary hover:text-primary transition-smooth backdrop-blur-sm"
+          >
+            Let's Talk
+          </a>
+        </motion.div>
       </div>
 
-      {/* Loading state */}
+      {/* Loading */}
       {!loaded && (
         <div className="absolute inset-0 z-30 flex items-center justify-center bg-background">
           <div className="flex flex-col items-center gap-4">
