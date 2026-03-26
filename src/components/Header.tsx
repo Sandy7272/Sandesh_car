@@ -30,10 +30,10 @@ const Header = () => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full z-[100] mix-blend-difference">
+      <header className="fixed top-0 left-0 w-full z-[100]">
         <div className="container-custom flex items-center justify-between h-16 md:h-20">
-          <a href="#" className="font-display italic text-lg text-foreground">
-            Sandesh.
+          <a href="#" className="font-mono-custom uppercase text-[12px] tracking-[0.15em] text-foreground">
+            <span className="font-bold">Portfolio,</span> Sandesh
           </a>
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-8">
