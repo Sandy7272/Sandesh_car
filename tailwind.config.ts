@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
 
 export default {
   darkMode: ["class"],
@@ -59,10 +60,10 @@ export default {
         },
       },
       fontFamily: {
-        display: ['Instrument Serif', 'serif'],
-        hero: ['Outfit', 'sans-serif'],
-        body: ['DM Sans', 'sans-serif'],
-        mono: ['DM Mono', 'monospace'],
+        display: ["DM Sans", "sans-serif"],
+        hero: ["DM Sans", "sans-serif"],
+        body: ["DM Sans", "sans-serif"],
+        mono: ["DM Sans", "sans-serif"],
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -90,5 +91,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [tailwindcssAnimate],
 } satisfies Config;

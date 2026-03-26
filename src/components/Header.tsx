@@ -8,19 +8,27 @@ const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
+    let rafId: number | null = null;
+
     const handleScroll = () => {
-      const sections = ["work", "about", "contact"];
-      for (const id of sections.reverse()) {
-        const el = document.getElementById(id);
-        if (el && el.getBoundingClientRect().top <= 200) {
-          setActiveSection(id);
-          return;
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        const sections = ["work", "about", "contact"];
+        for (const id of sections.reverse()) {
+          const el = document.getElementById(id);
+          if (el && el.getBoundingClientRect().top <= 200) {
+            setActiveSection(id);
+            return;
+          }
         }
-      }
-      setActiveSection("");
+        setActiveSection("");
+      });
     };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, []);
 
   const scrollTo = (id: string) => {
@@ -31,8 +39,8 @@ const Header = () => {
   return (
     <>
       <header className="fixed top-0 left-0 w-full z-[100]">
-        <div className="container-custom flex items-center justify-between h-16 md:h-20">
-          <a href="#" className="font-mono-custom uppercase text-[12px] tracking-[0.15em] text-foreground">
+        <div className="container-custom flex items-center justify-between h-16 sm:h-18 lg:h-20">
+          <a href="#home" className="font-mono-custom uppercase text-[12px] tracking-[0.15em] text-foreground">
             <span className="font-bold">Portfolio,</span> Sandesh
           </a>
           {/* Desktop nav */}
@@ -52,11 +60,14 @@ const Header = () => {
           </nav>
           {/* Mobile hamburger */}
           <button
-            className="md:hidden flex flex-col gap-1.5 p-2"
+            className="md:hidden flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.03]"
             onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
           >
-            <span className={`block w-5 h-[1px] bg-foreground transition-all duration-300 ${mobileOpen ? "rotate-45 translate-y-[3.5px]" : ""}`} />
-            <span className={`block w-5 h-[1px] bg-foreground transition-all duration-300 ${mobileOpen ? "-rotate-45 -translate-y-[3.5px]" : ""}`} />
+            <span className="flex flex-col gap-1.5">
+              <span className={`block w-5 h-[1px] bg-foreground transition-all duration-300 ${mobileOpen ? "rotate-45 translate-y-[3.5px]" : ""}`} />
+              <span className={`block w-5 h-[1px] bg-foreground transition-all duration-300 ${mobileOpen ? "-rotate-45 -translate-y-[3.5px]" : ""}`} />
+            </span>
           </button>
         </div>
       </header>
@@ -64,22 +75,34 @@ const Header = () => {
       {/* Mobile overlay */}
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[99] bg-background flex flex-col items-center justify-center gap-12"
-          >
-            {navLinks.map((link) => (
-              <button
-                key={link}
-                onClick={() => scrollTo(link)}
-                className="font-display italic text-4xl text-foreground hover:text-primary transition-smooth"
-              >
-                {link}
-              </button>
-            ))}
-          </motion.div>
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[99] bg-black/60 backdrop-blur-sm"
+              onClick={() => setMobileOpen(false)}
+            />
+            <motion.aside
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              className="fixed right-0 top-0 z-[100] h-screen w-[82%] max-w-[360px] border-l border-white/10 bg-[#0a0a0a] px-6 pt-24"
+            >
+              <nav className="flex flex-col gap-4">
+                {navLinks.map((link) => (
+                  <button
+                    key={link}
+                    onClick={() => scrollTo(link)}
+                    className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-4 text-left font-body text-lg text-white transition-smooth active:scale-[0.98]"
+                  >
+                    {link}
+                  </button>
+                ))}
+              </nav>
+            </motion.aside>
+          </>
         )}
       </AnimatePresence>
     </>

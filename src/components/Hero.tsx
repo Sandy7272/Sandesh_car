@@ -1,12 +1,11 @@
-import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
+import { useEffect, useRef, useState, type RefObject } from "react";
+import { motion, useScroll, type MotionValue } from "framer-motion";
 
 const FRAME_COUNT = 120;
 const frames: HTMLImageElement[] = [];
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+const easeInOut = (t: number) => 0.5 - 0.5 * Math.cos(Math.PI * t);
 
 const getFramePath = (index: number) =>
   `/sequence/frame_${String(index).padStart(3, "0")}_delay-0.066s.png`;
@@ -17,101 +16,248 @@ const fadeUp = (delay: number) => ({
   transition: { duration: 0.9, delay, ease: [0.22, 1, 0.36, 1] },
 });
 
-const Hero = () => {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [loaded, setLoaded] = useState(false);
-  const currentFrame = useRef(0);
+function useSmoothMouse(enabled: boolean) {
+  const targetRef = useRef({ x: 0, y: 0 });
+  const smoothRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
+    if (!enabled) return;
+    const onMove = (e: MouseEvent) => {
+      const x = (e.clientX / window.innerWidth) * 2 - 1;
+      const y = (e.clientY / window.innerHeight) * 2 - 1;
+      targetRef.current.x = clamp(x, -1, 1);
+      targetRef.current.y = clamp(y, -1, 1);
+    };
+    window.addEventListener("mousemove", onMove, { passive: true });
+    return () => window.removeEventListener("mousemove", onMove);
+  }, [enabled]);
+
+  return { targetRef, smoothRef };
+}
+
+function useImageSequence({
+  scrollYProgress,
+  canvasRef,
+  loaded,
+  mouseTargetRef,
+  mouseSmoothRef,
+}: {
+  scrollYProgress: MotionValue<number>;
+  canvasRef: RefObject<HTMLCanvasElement>;
+  loaded: boolean;
+  mouseTargetRef: RefObject<{ x: number; y: number }>;
+  mouseSmoothRef: RefObject<{ x: number; y: number }>;
+}) {
+  const targetFrameRef = useRef(0);
+  const currentFrameRef = useRef(0);
+  const rafRef = useRef<number | null>(null);
+  const canvasSizeRef = useRef({ w: 0, h: 0, dpr: 1 });
+  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+  const baseDrawRef = useRef({ w: 0, h: 0, x: 0, y: 0 });
+  const lastDrawnFrameRef = useRef(-1);
+  const lastTickRef = useRef(0);
+  const lastMouseRef = useRef({ x: 0, y: 0 });
+
+  const recalcBaseDraw = () => {
+    const { w, h } = canvasSizeRef.current;
+    const img = frames[0];
+    if (!w || !h || !img?.complete) return;
+    const overscan = 1.06;
+    const baseScale = Math.max(w / img.naturalWidth, h / img.naturalHeight) * overscan;
+    const drawW = img.naturalWidth * baseScale;
+    const drawH = img.naturalHeight * baseScale;
+    baseDrawRef.current = {
+      w: drawW,
+      h: drawH,
+      x: (w - drawW) / 2,
+      y: (h - drawH) / 2,
+    };
+  };
+
+  const resizeCanvas = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = Math.floor(window.innerWidth * dpr);
+    const h = Math.floor(window.innerHeight * dpr);
+    const prev = canvasSizeRef.current;
+    if (prev.w === w && prev.h === h && prev.dpr === dpr) return;
+    canvas.width = w;
+    canvas.height = h;
+    canvas.style.width = "100%";
+    canvas.style.height = "100%";
+    canvasSizeRef.current = { w, h, dpr };
+    if (!ctxRef.current) {
+      ctxRef.current = canvas.getContext("2d");
+      if (ctxRef.current) {
+        ctxRef.current.imageSmoothingEnabled = true;
+        ctxRef.current.imageSmoothingQuality = "high";
+      }
+    }
+    recalcBaseDraw();
+  };
+
+  const drawFrame = (frameIndex: number) => {
+    const ctx = ctxRef.current;
+    if (!ctx) return;
+    const img = frames[frameIndex];
+    if (!img || !img.complete) return;
+
+    const { w, h } = canvasSizeRef.current;
+    if (!w || !h) return;
+
+    // Smooth mouse lag (Apple-like delayed response)
+    const targetMouse = mouseTargetRef.current;
+    const smoothMouse = mouseSmoothRef.current;
+    smoothMouse.x = lerp(smoothMouse.x, targetMouse.x, 0.08);
+    smoothMouse.y = lerp(smoothMouse.y, targetMouse.y, 0.08);
+
+    const parallaxX = smoothMouse.x * 18;
+    const parallaxY = smoothMouse.y * 12;
+
+    const base = baseDrawRef.current;
+    const x = base.x - parallaxX;
+    const y = base.y - parallaxY;
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.drawImage(img, x, y, base.w, base.h);
+  };
+
+  useEffect(() => {
+    if (!loaded || !canvasRef.current) return;
+
+    resizeCanvas();
+    drawFrame(0);
+
+    const unsub = scrollYProgress.on("change", (v) => {
+      const p = clamp(v, 0, 1);
+      const eased = easeInOut(p);
+      targetFrameRef.current = eased * (FRAME_COUNT - 1);
+    });
+
+    const fps = 60;
+    const frameInterval = 1000 / fps;
+
+    const animate = (time: number) => {
+      if (!lastTickRef.current) lastTickRef.current = time;
+      const delta = time - lastTickRef.current;
+
+      if (delta >= frameInterval) {
+        // preserve fractional remainder for steadier frame pacing
+        lastTickRef.current = time - (delta % frameInterval);
+
+        currentFrameRef.current = lerp(currentFrameRef.current, targetFrameRef.current, 0.08);
+        const frame = clamp(Math.round(currentFrameRef.current), 0, FRAME_COUNT - 1);
+        const sm = mouseSmoothRef.current;
+        const lm = lastMouseRef.current;
+        const mouseDelta = Math.abs(sm.x - lm.x) + Math.abs(sm.y - lm.y);
+
+        // Redraw if frame changed or mouse parallax moved enough.
+        if (frame !== lastDrawnFrameRef.current || mouseDelta > 0.002) {
+          drawFrame(frame);
+          lastDrawnFrameRef.current = frame;
+          lm.x = sm.x;
+          lm.y = sm.y;
+        }
+      };
+
+      rafRef.current = requestAnimationFrame(animate);
+    };
+
+    rafRef.current = requestAnimationFrame(animate);
+
+    const onResize = () => {
+      resizeCanvas();
+      drawFrame(clamp(Math.round(currentFrameRef.current), 0, FRAME_COUNT - 1));
+    };
+    window.addEventListener("resize", onResize, { passive: true });
+
+    return () => {
+      unsub();
+      window.removeEventListener("resize", onResize);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [loaded, scrollYProgress, canvasRef, mouseTargetRef, mouseSmoothRef]);
+}
+
+const Hero = () => {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [progress, setProgress] = useState(1);
+  const { targetRef: mouseTargetRef, smoothRef: mouseSmoothRef } = useSmoothMouse(true);
+  const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end end"] });
+
+  useEffect(() => {
+    // Reuse preloaded frames across mounts/hot-reloads.
+    const alreadyReady = frames.length === FRAME_COUNT && frames.every((f) => f?.complete);
+    if (alreadyReady) {
+      setProgress(100);
+      setLoaded(true);
+      return;
+    }
+
     let loadedCount = 0;
+    let lastProgress = 1;
+    setProgress(1);
+
+    const updateProgress = () => {
+      const pct = Math.min(100, Math.max(1, Math.floor((loadedCount / FRAME_COUNT) * 100)));
+      // Reduce React work: only publish meaningful progress steps.
+      if (pct - lastProgress >= 2 || pct === 100) {
+        lastProgress = pct;
+        setProgress(pct);
+      }
+      if (loadedCount === FRAME_COUNT) setLoaded(true);
+    };
+
     for (let i = 0; i < FRAME_COUNT; i++) {
-      const img = new Image();
-      img.src = getFramePath(i);
+      const existing = frames[i];
+      if (existing?.complete) {
+        loadedCount++;
+        updateProgress();
+        continue;
+      }
+
+      const img = existing || new Image();
+      img.src = img.src || getFramePath(i);
       img.onload = () => {
         loadedCount++;
-        if (loadedCount === FRAME_COUNT) setLoaded(true);
+        updateProgress();
       };
       img.onerror = () => {
         loadedCount++;
-        if (loadedCount === FRAME_COUNT) setLoaded(true);
+        updateProgress();
       };
       frames[i] = img;
     }
   }, []);
 
-  const drawFrame = (index: number) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    const img = frames[index];
-    if (!img || !img.complete) return;
-
-    canvas.width = window.innerWidth * Math.min(window.devicePixelRatio, 2);
-    canvas.height = window.innerHeight * Math.min(window.devicePixelRatio, 2);
-    canvas.style.width = "100%";
-    canvas.style.height = "100%";
-
-    const scale = Math.max(
-      canvas.width / img.naturalWidth,
-      canvas.height / img.naturalHeight
-    );
-    const x = (canvas.width - img.naturalWidth * scale) / 2;
-    const y = (canvas.height - img.naturalHeight * scale) / 2;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(img, x, y, img.naturalWidth * scale, img.naturalHeight * scale);
-  };
-
-  useEffect(() => {
-    if (!loaded || !sectionRef.current || !canvasRef.current) return;
-
-    drawFrame(0);
-
-    const obj = { frame: 0 };
-    const tl = gsap.to(obj, {
-      frame: FRAME_COUNT - 1,
-      snap: "frame",
-      ease: "none",
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: "top top",
-        end: "+=300%",
-        pin: true,
-        scrub: 0.5,
-      },
-      onUpdate: () => {
-        const newFrame = Math.round(obj.frame);
-        if (newFrame !== currentFrame.current) {
-          currentFrame.current = newFrame;
-          drawFrame(newFrame);
-        }
-      },
-    });
-
-    const onResize = () => drawFrame(currentFrame.current);
-    window.addEventListener("resize", onResize);
-
-    return () => {
-      tl.kill();
-      ScrollTrigger.getAll().forEach((t) => t.kill());
-      window.removeEventListener("resize", onResize);
-    };
-  }, [loaded]);
+  useImageSequence({
+    scrollYProgress,
+    canvasRef,
+    loaded,
+    mouseTargetRef,
+    mouseSmoothRef,
+  });
 
   return (
-    <div ref={sectionRef} className="relative h-screen w-full overflow-hidden">
+    <section ref={sectionRef} id="home" className="relative isolate h-[220vh] w-full bg-background">
+      <div ref={stageRef} className="sticky top-0 h-screen w-full overflow-hidden">
+      {/* Opaque base to prevent next section bleeding through */}
+      <div className="absolute inset-0 z-0 bg-background" />
+
       {/* Canvas background */}
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 w-full h-full"
+        className="absolute inset-0 z-[1] w-full h-full"
         style={{ opacity: loaded ? 1 : 0, transition: "opacity 0.8s ease" }}
       />
 
       {/* Overlays */}
-      <div className="absolute inset-0 bg-background/60 z-10" />
-      <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-background/50 z-10" />
+      <div className="pointer-events-none absolute inset-0 bg-background/40 z-10" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-background/30 z-10" />
 
       {/* Content — centered like reference */}
       <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center">
@@ -179,6 +325,19 @@ const Hero = () => {
             <p className="font-mono-custom text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
               Loading Experience
             </p>
+            <div className="w-72 max-w-[82vw]">
+              <div className="h-[3px] w-full rounded-full bg-foreground/[0.12] overflow-hidden">
+                <motion.div
+                  className="h-full bg-primary"
+                  initial={{ width: "1%" }}
+                  animate={{ width: `${progress}%` }}
+                  transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                />
+              </div>
+              <p className="mt-2 font-mono-custom text-[10px] uppercase tracking-[0.15em] text-muted-foreground text-center">
+                {progress}%
+              </p>
+            </div>
           </div>
         </div>
       )}
@@ -197,7 +356,8 @@ const Hero = () => {
           <div className="w-[1px] h-8 bg-gradient-to-b from-primary/60 to-transparent" />
         </motion.div>
       )}
-    </div>
+      </div>
+    </section>
   );
 };
 
