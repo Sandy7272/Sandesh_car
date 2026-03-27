@@ -1,5 +1,6 @@
 import { useRef, useCallback } from "react";
 import { motion } from "framer-motion";
+import { AnimatedSection, StaggerContainer, StaggerItem } from "./AnimatedSection";
 
 const capabilities = [
   { num: "01", title: "3D Design & Rendering", tags: ["Blender", "3DS Max", "Maya", "Unreal", "Substance"] },
@@ -12,12 +13,10 @@ const capabilities = [
 
 const stats = [
   { value: "50+", label: "Projects Delivered" },
-  { value: "5+", label: "Years Experience" },
+  { value: "4+", label: "Years Experience" },
   { value: "70%", label: "Pipeline Automated" },
   { value: "3×", label: "Best Employee" },
 ];
-
-const EASE = [0.22, 1, 0.36, 1] as const;
 
 const CapabilityCard = ({ cap, index }: { cap: (typeof capabilities)[0]; index: number }) => {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -40,17 +39,12 @@ const CapabilityCard = ({ cap, index }: { cap: (typeof capabilities)[0]; index: 
   }, []);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.7, delay: index * 0.08, ease: EASE }}
-    >
+    <StaggerItem>
       <div
         ref={cardRef}
         onMouseMove={onMove}
         onMouseLeave={onLeave}
-        className="group relative h-full rounded-2xl border border-white/[0.06] bg-white/[0.02] p-7 md:p-8 overflow-hidden hover:border-white/[0.12] transition-all duration-500 cursor-default"
+        className="group relative h-full rounded-2xl border border-foreground/[0.06] bg-foreground/[0.02] p-7 md:p-8 overflow-hidden hover:border-foreground/[0.12] transition-all duration-500 cursor-default"
         style={{
           transformStyle: "preserve-3d",
           transform: "perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))",
@@ -58,43 +52,35 @@ const CapabilityCard = ({ cap, index }: { cap: (typeof capabilities)[0]; index: 
           transition: "transform 0.15s ease-out, border-color 0.5s",
         }}
       >
-        {/* Hover glow */}
         <div
           className="pointer-events-none absolute -inset-20 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
           style={{
-            background: "radial-gradient(circle at 40% 30%, rgba(255,255,255,0.06) 0%, transparent 50%)",
+            background: "radial-gradient(circle at 40% 30%, hsl(var(--foreground) / 0.06) 0%, transparent 50%)",
           }}
         />
-
-        {/* Number */}
-        <span className="font-mono-custom text-[10px] text-white/15 tracking-[0.2em]">
+        <span className="font-mono-custom text-[10px] text-foreground/15 tracking-[0.2em]">
           {cap.num}
         </span>
-
-        {/* Title */}
-        <h3 className="mt-4 font-display text-[18px] md:text-[20px] font-bold text-white tracking-tight">
+        <h3 className="mt-4 font-display text-[18px] md:text-[20px] font-bold text-foreground tracking-tight">
           {cap.title}
         </h3>
-
-        {/* Tags */}
         <div className="mt-5 flex flex-wrap gap-1.5">
           {cap.tags.map((tag) => (
             <span
               key={tag}
-              className="rounded-full border border-white/[0.06] bg-white/[0.02] px-3 py-1.5 font-mono-custom text-[9px] uppercase tracking-[0.12em] text-white/30"
+              className="rounded-full border border-foreground/[0.06] bg-foreground/[0.02] px-3 py-1.5 font-mono-custom text-[9px] uppercase tracking-[0.12em] text-foreground/30"
             >
               {tag}
             </span>
           ))}
         </div>
       </div>
-    </motion.div>
+    </StaggerItem>
   );
 };
 
 const Capabilities = () => (
-  <section className="relative bg-[#090909] py-24 md:py-32 lg:py-40 overflow-hidden">
-    {/* Subtle glow */}
+  <section className="relative bg-background py-24 md:py-32 lg:py-40 overflow-hidden">
     <div
       className="pointer-events-none absolute inset-0"
       style={{
@@ -103,73 +89,53 @@ const Capabilities = () => (
     />
 
     <div className="container-custom relative">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, ease: EASE }}
-        className="mb-16 md:mb-20"
-      >
+      <AnimatedSection className="mb-16 md:mb-20">
         <p className="section-label mb-4">Capabilities</p>
-        <h2 className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-bold leading-[0.95] text-white">
+        <h2 className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-bold leading-[0.95] text-foreground">
           What I<br />
-          <span className="text-white/30">build</span>
+          <span className="text-foreground/30">build</span>
         </h2>
-      </motion.div>
+      </AnimatedSection>
 
-      {/* Capability grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+      <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
         {capabilities.map((cap, i) => (
           <CapabilityCard key={cap.num} cap={cap} index={i} />
         ))}
-      </div>
+      </StaggerContainer>
 
-      {/* Stats row */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, ease: EASE }}
-        className="mt-16 md:mt-20 grid grid-cols-2 md:grid-cols-4 gap-px rounded-2xl overflow-hidden border border-white/[0.06]"
-      >
-        {stats.map((stat, i) => (
-          <div
-            key={i}
-            className="bg-white/[0.02] p-6 md:p-8 text-center hover:bg-white/[0.04] transition-colors duration-500"
-          >
-            <p className="font-display text-[clamp(2rem,4vw,3.5rem)] font-bold text-white leading-none">
-              {stat.value}
-            </p>
-            <p className="mt-2 font-mono-custom text-[9px] uppercase tracking-[0.18em] text-white/30">
-              {stat.label}
-            </p>
-          </div>
-        ))}
-      </motion.div>
+      <AnimatedSection delay={0.2} className="mt-16 md:mt-20">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-px rounded-2xl overflow-hidden border border-foreground/[0.06]">
+          {stats.map((stat, i) => (
+            <div
+              key={i}
+              className="bg-foreground/[0.02] p-6 md:p-8 text-center hover:bg-foreground/[0.04] transition-colors duration-500"
+            >
+              <p className="font-display text-[clamp(2rem,4vw,3.5rem)] font-bold text-foreground leading-none">
+                {stat.value}
+              </p>
+              <p className="mt-2 font-mono-custom text-[9px] uppercase tracking-[0.18em] text-foreground/30">
+                {stat.label}
+              </p>
+            </div>
+          ))}
+        </div>
+      </AnimatedSection>
 
-      {/* Clients row */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, delay: 0.2, ease: EASE }}
-        className="mt-12 md:mt-16"
-      >
-        <p className="font-mono-custom text-[10px] uppercase tracking-[0.2em] text-white/20 mb-5 text-center">
+      <AnimatedSection delay={0.3} className="mt-12 md:mt-16">
+        <p className="font-mono-custom text-[10px] uppercase tracking-[0.2em] text-foreground/20 mb-5 text-center">
           Trusted By
         </p>
         <div className="flex flex-wrap justify-center gap-2">
           {["L&T Realty", "Kesari Weddings", "Ultraviolette", "Byju's", "Tata", "IBW 2025", "Italica", "Material Depot"].map((name) => (
             <span
               key={name}
-              className="font-body text-[12px] border border-white/[0.06] text-white/25 px-4 py-2 rounded-full hover:border-white/15 hover:text-white/45 transition-all duration-400 cursor-default"
+              className="font-body text-[12px] border border-foreground/[0.06] text-foreground/25 px-4 py-2 rounded-full hover:border-foreground/15 hover:text-foreground/45 transition-all duration-400 cursor-default"
             >
               {name}
             </span>
           ))}
         </div>
-      </motion.div>
+      </AnimatedSection>
     </div>
   </section>
 );
