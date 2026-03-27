@@ -60,10 +60,10 @@ export default {
         },
       },
       fontFamily: {
-        display: ["DM Sans", "sans-serif"],
-        hero: ["DM Sans", "sans-serif"],
-        body: ["DM Sans", "sans-serif"],
-        mono: ["DM Sans", "sans-serif"],
+        display: ["Cabinet Grotesk", "Satoshi", "sans-serif"],
+        hero: ["Cabinet Grotesk", "Satoshi", "sans-serif"],
+        body: ["Satoshi", "sans-serif"],
+        mono: ["DM Mono", "monospace"],
       },
       borderRadius: {
         lg: "var(--radius)",

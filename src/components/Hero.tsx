@@ -10,10 +10,18 @@ const easeInOut = (t: number) => 0.5 - 0.5 * Math.cos(Math.PI * t);
 const getFramePath = (index: number) =>
   `/sequence/frame_${String(index).padStart(3, "0")}_delay-0.066s.png`;
 
+const EASE = [0.22, 1, 0.36, 1] as const;
+
 const fadeUp = (delay: number) => ({
-  initial: { opacity: 0, y: 30, filter: "blur(8px)" },
+  initial: { opacity: 0, y: 50, filter: "blur(12px)" },
   animate: { opacity: 1, y: 0, filter: "blur(0px)" },
-  transition: { duration: 0.9, delay, ease: [0.22, 1, 0.36, 1] },
+  transition: { duration: 1.1, delay, ease: EASE },
+});
+
+const lineReveal = (delay: number) => ({
+  initial: { scaleX: 0 },
+  animate: { scaleX: 1 },
+  transition: { duration: 1.4, delay, ease: EASE },
 });
 
 function useSmoothMouse(enabled: boolean) {
@@ -62,16 +70,11 @@ function useImageSequence({
     const { w, h } = canvasSizeRef.current;
     const img = frames[0];
     if (!w || !h || !img?.complete) return;
-    const overscan = 1.06;
+    const overscan = 1.08;
     const baseScale = Math.max(w / img.naturalWidth, h / img.naturalHeight) * overscan;
     const drawW = img.naturalWidth * baseScale;
     const drawH = img.naturalHeight * baseScale;
-    baseDrawRef.current = {
-      w: drawW,
-      h: drawH,
-      x: (w - drawW) / 2,
-      y: (h - drawH) / 2,
-    };
+    baseDrawRef.current = { w: drawW, h: drawH, x: (w - drawW) / 2, y: (h - drawH) / 2 };
   };
 
   const resizeCanvas = () => {
@@ -102,68 +105,48 @@ function useImageSequence({
     if (!ctx) return;
     const img = frames[frameIndex];
     if (!img || !img.complete) return;
-
     const { w, h } = canvasSizeRef.current;
     if (!w || !h) return;
-
-    // Smooth mouse lag (Apple-like delayed response)
     const targetMouse = mouseTargetRef.current;
     const smoothMouse = mouseSmoothRef.current;
-    smoothMouse.x = lerp(smoothMouse.x, targetMouse.x, 0.08);
-    smoothMouse.y = lerp(smoothMouse.y, targetMouse.y, 0.08);
-
-    const parallaxX = smoothMouse.x * 18;
-    const parallaxY = smoothMouse.y * 12;
-
+    smoothMouse.x = lerp(smoothMouse.x, targetMouse.x, 0.06);
+    smoothMouse.y = lerp(smoothMouse.y, targetMouse.y, 0.06);
+    const parallaxX = smoothMouse.x * 20;
+    const parallaxY = smoothMouse.y * 14;
     const base = baseDrawRef.current;
-    const x = base.x - parallaxX;
-    const y = base.y - parallaxY;
-
     ctx.clearRect(0, 0, w, h);
-    ctx.drawImage(img, x, y, base.w, base.h);
+    ctx.drawImage(img, base.x - parallaxX, base.y - parallaxY, base.w, base.h);
   };
 
   useEffect(() => {
     if (!loaded || !canvasRef.current) return;
-
     resizeCanvas();
     drawFrame(0);
 
     const unsub = scrollYProgress.on("change", (v) => {
       const p = clamp(v, 0, 1);
-      const eased = easeInOut(p);
-      targetFrameRef.current = eased * (FRAME_COUNT - 1);
+      targetFrameRef.current = easeInOut(p) * (FRAME_COUNT - 1);
     });
-
-    const fps = 60;
-    const frameInterval = 1000 / fps;
 
     const animate = (time: number) => {
       if (!lastTickRef.current) lastTickRef.current = time;
       const delta = time - lastTickRef.current;
-
-      if (delta >= frameInterval) {
-        // preserve fractional remainder for steadier frame pacing
-        lastTickRef.current = time - (delta % frameInterval);
-
+      if (delta >= 16.67) {
+        lastTickRef.current = time - (delta % 16.67);
         currentFrameRef.current = lerp(currentFrameRef.current, targetFrameRef.current, 0.08);
         const frame = clamp(Math.round(currentFrameRef.current), 0, FRAME_COUNT - 1);
         const sm = mouseSmoothRef.current;
         const lm = lastMouseRef.current;
         const mouseDelta = Math.abs(sm.x - lm.x) + Math.abs(sm.y - lm.y);
-
-        // Redraw if frame changed or mouse parallax moved enough.
         if (frame !== lastDrawnFrameRef.current || mouseDelta > 0.002) {
           drawFrame(frame);
           lastDrawnFrameRef.current = frame;
           lm.x = sm.x;
           lm.y = sm.y;
         }
-      };
-
+      }
       rafRef.current = requestAnimationFrame(animate);
     };
-
     rafRef.current = requestAnimationFrame(animate);
 
     const onResize = () => {
@@ -171,7 +154,6 @@ function useImageSequence({
       drawFrame(clamp(Math.round(currentFrameRef.current), 0, FRAME_COUNT - 1));
     };
     window.addEventListener("resize", onResize, { passive: true });
-
     return () => {
       unsub();
       window.removeEventListener("resize", onResize);
@@ -182,7 +164,6 @@ function useImageSequence({
 
 const Hero = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
-  const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [loaded, setLoaded] = useState(false);
   const [progress, setProgress] = useState(1);
@@ -190,172 +171,158 @@ const Hero = () => {
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ["start start", "end end"] });
 
   useEffect(() => {
-    // Reuse preloaded frames across mounts/hot-reloads.
     const alreadyReady = frames.length === FRAME_COUNT && frames.every((f) => f?.complete);
-    if (alreadyReady) {
-      setProgress(100);
-      setLoaded(true);
-      return;
-    }
-
+    if (alreadyReady) { setProgress(100); setLoaded(true); return; }
     let loadedCount = 0;
     let lastProgress = 1;
     setProgress(1);
-
     const updateProgress = () => {
       const pct = Math.min(100, Math.max(1, Math.floor((loadedCount / FRAME_COUNT) * 100)));
-      // Reduce React work: only publish meaningful progress steps.
-      if (pct - lastProgress >= 2 || pct === 100) {
-        lastProgress = pct;
-        setProgress(pct);
-      }
+      if (pct - lastProgress >= 2 || pct === 100) { lastProgress = pct; setProgress(pct); }
       if (loadedCount === FRAME_COUNT) setLoaded(true);
     };
-
     for (let i = 0; i < FRAME_COUNT; i++) {
       const existing = frames[i];
-      if (existing?.complete) {
-        loadedCount++;
-        updateProgress();
-        continue;
-      }
-
+      if (existing?.complete) { loadedCount++; updateProgress(); continue; }
       const img = existing || new Image();
       img.src = img.src || getFramePath(i);
-      img.onload = () => {
-        loadedCount++;
-        updateProgress();
-      };
-      img.onerror = () => {
-        loadedCount++;
-        updateProgress();
-      };
+      img.onload = () => { loadedCount++; updateProgress(); };
+      img.onerror = () => { loadedCount++; updateProgress(); };
       frames[i] = img;
     }
   }, []);
 
-  useImageSequence({
-    scrollYProgress,
-    canvasRef,
-    loaded,
-    mouseTargetRef,
-    mouseSmoothRef,
-  });
+  useImageSequence({ scrollYProgress, canvasRef, loaded, mouseTargetRef, mouseSmoothRef });
 
   return (
-    <section ref={sectionRef} id="home" className="relative isolate h-[220vh] w-full bg-background">
-      <div ref={stageRef} className="sticky top-0 h-screen w-full overflow-hidden">
-      {/* Opaque base to prevent next section bleeding through */}
-      <div className="absolute inset-0 z-0 bg-background" />
+    <section ref={sectionRef} id="home" className="relative isolate h-[220vh] w-full bg-[#090909]">
+      <div className="sticky top-0 h-screen w-full overflow-hidden">
+        {/* Base */}
+        <div className="absolute inset-0 z-0 bg-[#090909]" />
 
-      {/* Canvas background */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 z-[1] w-full h-full"
-        style={{ opacity: loaded ? 1 : 0, transition: "opacity 0.8s ease" }}
-      />
+        {/* Canvas */}
+        <canvas
+          ref={canvasRef}
+          className="absolute inset-0 z-[1] w-full h-full"
+          style={{ opacity: loaded ? 1 : 0, transition: "opacity 1s ease" }}
+        />
 
-      {/* Overlays */}
-      <div className="pointer-events-none absolute inset-0 bg-background/40 z-10" />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-background/30 z-10" />
+        {/* Cinematic overlays */}
+        <div className="pointer-events-none absolute inset-0 z-10 bg-[#090909]/50" />
+        <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-[#090909] via-transparent to-[#090909]/40" />
+        <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-r from-[#090909]/60 via-transparent to-transparent" />
 
-      {/* Content — centered like reference */}
-      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center">
-        {/* Currently at badge */}
-        <motion.div
-          {...fadeUp(0)}
-          className="flex items-center gap-3 mb-10"
-        >
-          <div className="w-10 h-10 rounded-full bg-card border border-foreground/10 flex items-center justify-center overflow-hidden">
-            <span className="font-display italic text-sm text-foreground">S</span>
-          </div>
-          <div className="text-left">
-            <p className="font-body text-[12px] text-muted-foreground leading-tight">Currently at</p>
-            <p className="font-hero text-[15px] text-foreground font-black leading-tight">MetaShop AI.</p>
-          </div>
-        </motion.div>
+        {/* Content — editorial asymmetric layout */}
+        <div className="absolute inset-0 z-20 flex flex-col justify-end pb-16 sm:pb-20 lg:pb-24">
+          <div className="container-custom">
+            {/* Eyebrow */}
+            <motion.div
+              {...fadeUp(0.3)}
+              className="flex items-center gap-3 mb-8"
+            >
+              <div className="w-2 h-2 rounded-full bg-[hsl(var(--primary))] animate-pulse" />
+              <span className="font-mono-custom text-[11px] uppercase tracking-[0.2em] text-white/50">
+                Creative Technologist · 3D Product Builder
+              </span>
+            </motion.div>
 
-        {/* Giant name */}
-        <motion.h1
-          {...fadeUp(0.1)}
-          className="font-hero font-black text-foreground leading-[0.88] lowercase tracking-tight"
-          style={{ fontSize: "clamp(4rem, 14vw, 13rem)" }}
-        >
-          sandesh
-        </motion.h1>
-        <motion.h1
-          {...fadeUp(0.2)}
-          className="font-hero font-black text-foreground leading-[0.88] lowercase tracking-tight"
-          style={{ fontSize: "clamp(4rem, 14vw, 13rem)" }}
-        >
-          gadakh
-        </motion.h1>
+            {/* Giant editorial name */}
+            <div className="overflow-hidden">
+              <motion.h1
+                {...fadeUp(0.5)}
+                className="font-display font-black text-white leading-[0.88] lowercase"
+                style={{ fontSize: "clamp(3.5rem, 13vw, 12rem)" }}
+              >
+                sandesh
+              </motion.h1>
+            </div>
+            <div className="overflow-hidden">
+              <motion.h1
+                {...fadeUp(0.65)}
+                className="font-display font-black leading-[0.88] lowercase"
+                style={{
+                  fontSize: "clamp(3.5rem, 13vw, 12rem)",
+                  color: "transparent",
+                  WebkitTextStroke: "1.5px rgba(255,255,255,0.35)",
+                }}
+              >
+                gadakh
+              </motion.h1>
+            </div>
 
-        {/* Role */}
-        <motion.p
-          {...fadeUp(0.3)}
-          className="font-body text-lg md:text-xl text-muted-foreground mt-6"
-        >
-          Creative Technologist · 3D Product Builder
-        </motion.p>
+            {/* Decorative line */}
+            <motion.div
+              {...lineReveal(1)}
+              className="mt-8 h-[1px] w-full max-w-[320px] bg-gradient-to-r from-[hsl(var(--primary))] to-transparent origin-left"
+            />
 
-        {/* CTAs */}
-        <motion.div {...fadeUp(0.45)} className="flex flex-wrap justify-center gap-4 mt-10">
-          <a
-            href="#work"
-            className="group inline-flex items-center gap-2 font-mono-custom text-[12px] uppercase tracking-[0.15em] bg-primary text-primary-foreground px-8 py-4 rounded-full hover:brightness-110 transition-smooth"
-          >
-            View Work
-            <span className="inline-block transition-transform group-hover:translate-x-1">→</span>
-          </a>
-          <a
-            href="#contact"
-            className="inline-flex items-center font-mono-custom text-[12px] uppercase tracking-[0.15em] border border-foreground/[0.15] text-foreground px-8 py-4 rounded-full hover:border-primary hover:text-primary transition-smooth backdrop-blur-sm"
-          >
-            Let's Talk
-          </a>
-        </motion.div>
-      </div>
+            {/* Bottom row: status + CTA */}
+            <div className="mt-8 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-6">
+              <motion.div {...fadeUp(0.9)} className="max-w-[380px]">
+                <p className="font-body text-[15px] text-white/45 leading-relaxed">
+                  Building production-grade 3D viewers, automated pipelines, and immersive web experiences at MetaShop AI.
+                </p>
+              </motion.div>
 
-      {/* Loading */}
-      {!loaded && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center bg-background">
-          <div className="flex flex-col items-center gap-4">
-            <div className="w-12 h-12 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
-            <p className="font-mono-custom text-[11px] uppercase tracking-[0.15em] text-muted-foreground">
-              Loading Experience
-            </p>
-            <div className="w-72 max-w-[82vw]">
-              <div className="h-[3px] w-full rounded-full bg-foreground/[0.12] overflow-hidden">
-                <motion.div
-                  className="h-full bg-primary"
-                  initial={{ width: "1%" }}
-                  animate={{ width: `${progress}%` }}
-                  transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-                />
-              </div>
-              <p className="mt-2 font-mono-custom text-[10px] uppercase tracking-[0.15em] text-muted-foreground text-center">
-                {progress}%
-              </p>
+              <motion.div {...fadeUp(1)} className="flex items-center gap-4">
+                <a
+                  href="#work"
+                  className="group inline-flex items-center gap-3 font-body text-[13px] font-medium text-white border border-white/15 px-7 py-3.5 rounded-full hover:bg-white hover:text-[#090909] transition-all duration-500"
+                >
+                  View Selected Work
+                  <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </a>
+              </motion.div>
             </div>
           </div>
         </div>
-      )}
 
-      {/* Scroll indicator */}
-      {loaded && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2"
-        >
-          <span className="font-mono-custom text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
-            Scroll
-          </span>
-          <div className="w-[1px] h-8 bg-gradient-to-b from-primary/60 to-transparent" />
-        </motion.div>
-      )}
+        {/* Scroll indicator */}
+        {loaded && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 2 }}
+            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-3"
+          >
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+              className="w-[1px] h-10 bg-gradient-to-b from-white/40 to-transparent"
+            />
+          </motion.div>
+        )}
+
+        {/* Loading */}
+        {!loaded && (
+          <div className="absolute inset-0 z-30 flex items-center justify-center bg-[#090909]">
+            <div className="flex flex-col items-center gap-6">
+              <div className="relative w-16 h-16">
+                <div className="absolute inset-0 rounded-full border border-white/10" />
+                <motion.div
+                  className="absolute inset-0 rounded-full border-t border-white/60"
+                  animate={{ rotate: 360 }}
+                  transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                />
+              </div>
+              <div className="w-48">
+                <div className="h-[2px] w-full rounded-full bg-white/[0.08] overflow-hidden">
+                  <motion.div
+                    className="h-full bg-white/60"
+                    initial={{ width: "1%" }}
+                    animate={{ width: `${progress}%` }}
+                    transition={{ duration: 0.2, ease: EASE }}
+                  />
+                </div>
+                <p className="mt-3 font-mono-custom text-[10px] uppercase tracking-[0.2em] text-white/30 text-center">
+                  {progress}%
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

@@ -1,89 +1,63 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 
 const experiences = [
   {
     company: "MetaShop AI",
-    location: "Pune, India",
-    role: "Product Builder & Creative Operations Lead",
-    period: "Jan 2023 — Present",
+    role: "Product Builder & Creative Ops Lead",
+    period: "2023 — Present",
     badge: "Equity Award",
-    points: [
-      "Built company’s first AI-powered 3D viewer platform using React + Three.js, enabling real-time product interaction",
-      "Transformed video-to-3D pipeline into a production-grade system using Gaussian Splatting & Nerfstudio",
-      "Automated full 3D processing pipeline (data → training → export), reducing manual work by 70% and scaling output 3×",
-      "Led end-to-end delivery of 50+ client projects including Kesari Weddings & L&T Realty",
-      "Managed full production lifecycle from capture to final 3D delivery, coordinating on-ground teams",
-      "Enhanced UI/UX and built internal tools using AI-assisted workflows",
+    highlights: [
+      "Built AI-powered 3D viewer platform — React + Three.js",
+      "Automated full 3D pipeline, scaling output 3× and cutting manual work 70%",
+      "Delivered 50+ client projects including L&T Realty & Kesari Weddings",
     ],
   },
   {
-    company: "Byju’s (Think & Learn Pvt. Ltd.)",
-    location: "Bangalore, India",
+    company: "Byju's",
     role: "Motion Graphics Artist & 3D Specialist",
-    period: "Oct 2021 — Jan 2023",
-    badge: "Best Employee — 3×",
-    points: [
-      "Created high-quality 3D and motion graphics content consumed by millions of students",
-      "Built reusable animation systems improving production efficiency by 40% across 100+ modules",
-      "Collaborated with product and design teams to enhance storytelling and engagement",
-      "Awarded Best Employee 3× among 400+ designers for performance and innovation",
+    period: "2021 — 2023",
+    badge: "Best Employee 3×",
+    highlights: [
+      "Created 3D and motion content consumed by millions of students",
+      "Built reusable animation systems improving production efficiency 40%",
+      "Awarded Best Employee 3× among 400+ designers",
     ],
   },
   {
-    company: "Global Studio (Freelance)",
-    location: "Pune, India",
+    company: "Global Studio",
     role: "3D Artist & VFX Specialist",
-    period: "Jan 2020 — Sep 2021",
+    period: "2020 — 2021",
     badge: "Freelance",
-    points: [
-      "Delivered 3D assets, environments, and VFX for gaming and commercial projects",
-      "Handled full freelance pipeline with 100% on-time delivery",
+    highlights: [
+      "Delivered 3D assets, environments, and VFX for gaming & commercial projects",
+      "100% on-time delivery across all freelance engagements",
     ],
   },
 ];
 
+const EASE = [0.22, 1, 0.36, 1] as const;
+
 export default function Experience() {
-  const ref = useRef<HTMLElement>(null);
-  const [visible, setVisible] = useState(false);
-  const timelineRef = useRef<HTMLDivElement>(null);
-  const centerFillRef = useRef<HTMLDivElement>(null);
-  const cardRefs = useRef<HTMLDivElement[]>([]);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const sectionRef = useRef<HTMLElement>(null);
+  const lineRef = useRef<HTMLDivElement>(null);
+  const fillRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setVisible(entry.isIntersecting),
-      { threshold: 0.1 }
-    );
-
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const tl = timelineRef.current;
-    if (!tl) return;
+    const line = lineRef.current;
+    if (!line) return;
 
     const update = () => {
-      const fillEl = centerFillRef.current;
-      if (!fillEl) return;
-
-      const rect = tl.getBoundingClientRect();
-      const viewportH = window.innerHeight || 1;
-
-      // progress from when section top hits viewport bottom -> section bottom hits viewport top
-      const start = viewportH; // rect.top === viewportH => 0
-      const end = -rect.height; // rect.top === -rect.height => 1
-      const raw = (start - rect.top) / (start - end);
+      const fill = fillRef.current;
+      if (!fill) return;
+      const rect = line.getBoundingClientRect();
+      const vh = window.innerHeight || 1;
+      const raw = (vh - rect.top) / (vh + rect.height);
       const p = Math.max(0, Math.min(1, raw));
-
-      fillEl.style.transform = `scaleY(${Math.max(0.001, p)})`;
+      fill.style.transform = `scaleY(${Math.max(0.001, p)})`;
     };
 
     const onScroll = () => {
@@ -93,153 +67,87 @@ export default function Experience() {
 
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-
     return () => {
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
   }, []);
 
-  useEffect(() => {
-    const nodes = cardRefs.current.filter(Boolean);
-    if (nodes.length === 0) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleEntries = entries.filter((e) => e.isIntersecting);
-        if (visibleEntries.length === 0) return;
-
-        // Pick the most "engaged" card to reduce flicker/delays.
-        const best = visibleEntries.reduce((acc, cur) =>
-          (cur.intersectionRatio ?? 0) > (acc.intersectionRatio ?? 0) ? cur : acc
-        );
-
-        const el = best.target as HTMLDivElement;
-        const idx = nodes.indexOf(el);
-        if (idx >= 0) setActiveIndex(idx);
-      },
-      { threshold: [0.2, 0.35, 0.5], rootMargin: "-10% 0px -55% 0px" }
-    );
-
-    nodes.forEach((n) => observer.observe(n));
-    return () => observer.disconnect();
-  }, []);
-
   return (
-    <section ref={ref} className="relative bg-[#0a0a0a] py-28 text-white font-body">
-      <div className="max-w-6xl mx-auto px-6">
-
-        {/* Heading */}
-        <div className="text-center mb-24">
-          <h2 className="text-5xl font-bold tracking-tight font-body">
-            Experience
+    <section ref={sectionRef} id="experience" className="relative bg-[#090909] py-24 md:py-32 lg:py-40">
+      <div className="container-custom">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: EASE }}
+          className="mb-16 md:mb-24"
+        >
+          <p className="section-label mb-4">Experience</p>
+          <h2 className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-bold leading-[0.95] text-white">
+            Career<br />
+            <span className="text-white/30">trajectory</span>
           </h2>
-          <p className="mt-4 text-white/60 max-w-2xl mx-auto font-body">
-            Building scalable AI-powered 3D systems, cinematic experiences, and production pipelines.
-          </p>
-        </div>
+        </motion.div>
 
         {/* Timeline */}
-        <div ref={timelineRef} className="relative">
-
-          {/* Vertical Line */}
-          <div className="absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 bg-gradient-to-b from-transparent via-white/20 to-transparent" />
-          {/* Scroll fill overlay */}
+        <div ref={lineRef} className="relative">
+          {/* Vertical line — center on desktop, left on mobile */}
+          <div className="absolute left-4 md:left-0 top-0 h-full w-[1px] bg-white/[0.08]" />
           <div
-            ref={centerFillRef}
-            className="absolute left-1/2 top-0 h-full w-[2px] -translate-x-1/2 origin-top bg-[#ff6b6b]"
+            ref={fillRef}
+            className="absolute left-4 md:left-0 top-0 h-full w-[1px] bg-[hsl(var(--primary))] origin-top"
             style={{ transform: "scaleY(0.001)" }}
-            aria-hidden
           />
 
-          <div className="space-y-24">
-            {experiences.map((exp, i) => {
-              const isLeft = i % 2 === 0;
-              const isActive = i === activeIndex;
+          <div className="space-y-12 md:space-y-16">
+            {experiences.map((exp, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.8, delay: i * 0.1, ease: EASE }}
+                className="relative pl-12 md:pl-16"
+              >
+                {/* Timeline dot */}
+                <div className="absolute left-[9px] md:left-[-5px] top-2 w-3 h-3 rounded-full border-2 border-[hsl(var(--primary))] bg-[#090909]" />
 
-              return (
-                <div
-                  key={i}
-                  className={`relative flex flex-col md:flex-row items-center ${
-                    isLeft ? "md:justify-start" : "md:justify-end"
-                  }`}
-                >
-                  {/* Timeline marker (aligned to card top; fills when reached) */}
-                  <div
-                    className={`absolute left-1/2 top-7 -translate-x-1/2 z-10 h-5 w-5 rounded-full ring-1 transition-colors ${
-                      isActive
-                        ? "bg-[#ff6b6b] ring-[#ff6b6b]/40 shadow-[0_0_25px_rgba(255,107,107,0.55)]"
-                        : "bg-white/20 ring-white/15"
-                    }`}
-                    aria-hidden
-                  />
-
-                  {/* Card */}
-                  <div
-                    className={`
-                      w-full md:w-[45%]
-                      ${isLeft ? "md:pr-12" : "md:pl-12"}
-                    `}
-                  >
-                    <div
-                      ref={(el) => {
-                        if (el) cardRefs.current[i] = el;
-                      }}
-                      className={`
-                        p-7 rounded-2xl
-                        bg-white/5 backdrop-blur-xl
-                        border border-white/10
-                        shadow-[0_20px_60px_rgba(0,0,0,0.6)]
-                        transition-all duration-700
-                        ${
-                          visible
-                            ? "opacity-100 translate-y-0"
-                            : "opacity-0 translate-y-16"
-                        }
-                      `}
-                    >
-                      {/* Period */}
-                      <p className="text-xs text-white/40 uppercase tracking-widest">
-                        {exp.period}
-                      </p>
-
-                      {/* Title */}
-                      <h3 className="text-xl font-semibold mt-2">
+                {/* Card */}
+                <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6 md:p-8 hover:border-white/[0.12] hover:bg-white/[0.03] transition-all duration-500 group">
+                  {/* Top row */}
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-5">
+                    <div>
+                      <h3 className="font-display text-xl md:text-2xl font-bold text-white group-hover:text-[hsl(var(--primary))] transition-colors duration-500">
                         {exp.company}
-                        <span className="text-white/50 text-sm font-normal">
-                          {" "}· {exp.location}
-                        </span>
                       </h3>
-
-                      {/* Role */}
-                      <p className="text-white/60 text-sm mt-1">
-                        {exp.role}
-                      </p>
-
-                      {/* Badge */}
-                      <div className="mt-2 text-xs text-[#ff6b6b]">
+                      <p className="font-body text-[13px] text-white/45 mt-1">{exp.role}</p>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="font-mono-custom text-[10px] uppercase tracking-[0.18em] text-white/30">
+                        {exp.period}
+                      </span>
+                      <span className="px-2.5 py-1 rounded-full bg-[hsl(var(--primary))]/10 font-mono-custom text-[9px] uppercase tracking-[0.12em] text-[hsl(var(--primary))]">
                         {exp.badge}
-                      </div>
-
-                      {/* Points */}
-                      <ul className="mt-5 space-y-2">
-                        {exp.points.map((point, idx) => (
-                          <li
-                            key={idx}
-                            className="flex gap-2 text-sm text-white/70 leading-relaxed"
-                          >
-                            <span className="w-1.5 h-1.5 mt-2 rounded-full bg-[#ff6b6b]" />
-                            {point}
-                          </li>
-                        ))}
-                      </ul>
+                      </span>
                     </div>
                   </div>
+
+                  {/* Highlights */}
+                  <div className="space-y-2.5">
+                    {exp.highlights.map((point, idx) => (
+                      <div key={idx} className="flex gap-3 items-start">
+                        <div className="w-1 h-1 rounded-full bg-white/20 mt-2 shrink-0" />
+                        <p className="font-body text-[14px] text-white/50 leading-relaxed">
+                          {point}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              );
-            })}
+              </motion.div>
+            ))}
           </div>
         </div>
       </div>

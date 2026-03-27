@@ -1,188 +1,164 @@
 import { useState } from "react";
-import { motion, type PanInfo } from "framer-motion";
+import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const categories = [
+const projects = [
   {
     id: "3d",
-    title: "3D",
-    description: "Dark, depth-heavy visuals with subtle spatial motion and lighting.",
+    num: "01",
+    title: "3D Spatial Work",
+    subtitle: "Immersive environments and product visualization",
+    tags: ["Blender", "Three.js", "WebXR", "Unreal"],
     href: "/work/3d",
-    gradient:
-      "radial-gradient(ellipse at 25% 30%, rgba(96,180,255,0.35) 0%, rgba(0,0,0,0.0) 55%), linear-gradient(150deg,#0a0a0a 20%, #101726 100%)",
-    glow: "rgba(96,180,255,0.28)",
+    gradient: "radial-gradient(ellipse at 20% 50%, rgba(96,180,255,0.2) 0%, transparent 60%)",
+    accent: "#60b4ff",
   },
   {
     id: "motion",
+    num: "02",
     title: "Motion Graphics",
-    description: "Animated gradients and cinematic pacing for high-energy visual narratives.",
+    subtitle: "Cinematic animation and visual storytelling",
+    tags: ["After Effects", "Premiere", "2.5D Animation"],
     href: "/work/motion",
-    gradient:
-      "radial-gradient(ellipse at 75% 35%, rgba(162,155,254,0.4) 0%, rgba(0,0,0,0.0) 50%), linear-gradient(130deg,#140d22 0%, #0a0a0a 100%)",
-    glow: "rgba(162,155,254,0.26)",
+    gradient: "radial-gradient(ellipse at 80% 30%, rgba(162,155,254,0.2) 0%, transparent 60%)",
+    accent: "#a29bfe",
   },
   {
     id: "uiux",
-    title: "UI/UX",
-    description: "Minimal, sharp typography and clear structure with strong usability.",
+    num: "03",
+    title: "UI/UX Design",
+    subtitle: "Product interfaces and design systems",
+    tags: ["Figma", "Photoshop", "Motion UI"],
     href: "/work/uiux",
-    gradient:
-      "radial-gradient(ellipse at 50% 20%, rgba(223,255,74,0.22) 0%, rgba(0,0,0,0) 45%), linear-gradient(180deg,#f7f8fb 0%, #d9dee8 100%)",
-    glow: "rgba(223,255,74,0.24)",
+    gradient: "radial-gradient(ellipse at 50% 70%, rgba(255,107,107,0.15) 0%, transparent 60%)",
+    accent: "#ff6b6b",
   },
   {
     id: "video-to-3d",
-    title: "Video-to-3D",
-    description: "Tech-forward workflows with scan, reconstruction and delivery pipelines.",
+    num: "04",
+    title: "Video → 3D Pipeline",
+    subtitle: "Automated capture-to-delivery systems",
+    tags: ["Gaussian Splatting", "NeRF", "Nerfstudio"],
     href: "/work/video-to-3d",
-    gradient:
-      "radial-gradient(ellipse at 70% 60%, rgba(120,80,255,0.32) 0%, rgba(0,0,0,0) 50%), linear-gradient(155deg,#120d1f 0%, #0a0a0a 100%)",
-    glow: "rgba(120,80,255,0.26)",
+    gradient: "radial-gradient(ellipse at 70% 40%, rgba(251,146,60,0.18) 0%, transparent 60%)",
+    accent: "#fb923c",
   },
 ] as const;
 
 const EASE = [0.22, 1, 0.36, 1] as const;
-const MotionLink = motion(Link);
 
 const Work = () => {
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-
-  const onMobileCardAction = (id: string, href: string) => {
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-    if (!isMobile) return;
-    if (expandedId === id) {
-      window.location.href = href;
-      return;
-    }
-    setExpandedId(id);
-  };
-
-  const onMobileSwipe = (id: string, href: string, _e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-    if (!isMobile) return;
-    if (Math.abs(info.offset.x) > 72 || Math.abs(info.velocity.x) > 520) {
-      window.location.href = href;
-      return;
-    }
-    if (Math.abs(info.offset.y) < 24) setExpandedId(id);
-  };
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   return (
-    <section id="work" className="relative overflow-hidden bg-[#0a0a0a] section-padding">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(1100px 520px at 18% 15%, hsl(var(--primary) / 0.1) 0%, transparent 55%), radial-gradient(1000px 500px at 85% 80%, rgba(120,80,255,0.1) 0%, transparent 60%)",
-        }}
-      />
-
-      <div className="container-custom relative">
+    <section id="work" className="relative bg-[#090909] py-24 md:py-32 lg:py-40">
+      <div className="container-custom">
+        {/* Section header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.65, ease: EASE }}
-          className="mb-10 md:mb-12"
+          transition={{ duration: 0.8, ease: EASE }}
+          className="mb-16 md:mb-20 flex flex-col md:flex-row md:items-end justify-between gap-6"
         >
-          <p className="section-label mb-3">Selected Work</p>
-          <h2 className="h2-fluid font-body font-semibold leading-[1.04] tracking-tight text-white">
-            Interactive Work System
-          </h2>
-          <p className="body-fluid mt-4 max-w-[62ch] font-body leading-relaxed text-white/58">
-            Explore by category. Each card opens a dedicated work space with focused projects and deeper details.
+          <div>
+            <p className="section-label mb-4">Selected Work</p>
+            <h2 className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-bold leading-[0.95] text-white">
+              Work that<br />
+              <span className="text-white/30">speaks volumes</span>
+            </h2>
+          </div>
+          <p className="font-body text-[14px] text-white/40 max-w-[320px] leading-relaxed">
+            Explore by category — each opens a focused workspace with projects and deeper detail.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6 lg:gap-7">
-          {categories.map((category, i) => {
-            const dimmed = activeId !== null && activeId !== category.id && expandedId !== category.id;
-            const expanded = expandedId === category.id;
+        {/* Project list — editorial stacked rows */}
+        <div className="space-y-[1px]">
+          {projects.map((project, i) => {
+            const isHovered = hoveredId === project.id;
+            const isDimmed = hoveredId !== null && !isHovered;
+
             return (
               <motion.div
-                key={category.id}
-                initial={{ opacity: 0, y: 24 }}
+                key={project.id}
+                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.6, delay: i * 0.06, ease: EASE }}
+                transition={{ duration: 0.7, delay: i * 0.08, ease: EASE }}
               >
-                <MotionLink
-                  to={category.href}
-                  drag={typeof window !== "undefined" && window.innerWidth < 768 ? "x" : false}
-                  dragConstraints={{ left: 0, right: 0 }}
-                  dragElastic={0.16}
-                  onDragEnd={(e, info) => onMobileSwipe(category.id, category.href, e, info)}
-                  onClick={(e) => {
-                    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-                    if (!isMobile) return;
-                    e.preventDefault();
-                    onMobileCardAction(category.id, category.href);
-                  }}
-                  onHoverStart={() => setActiveId(category.id)}
-                  onHoverEnd={() => setActiveId(null)}
-                  className="group relative block overflow-hidden rounded-2xl border border-white/[0.1] bg-white/[0.03] p-6 md:p-7"
-                  style={{
-                    minHeight: "clamp(260px, 33vw, 350px)",
-                    opacity: dimmed ? 0.5 : 1,
-                  }}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  transition={{ duration: 0.45, ease: EASE }}
+                <Link
+                  to={project.href}
+                  onMouseEnter={() => setHoveredId(project.id)}
+                  onMouseLeave={() => setHoveredId(null)}
+                  className="group relative block overflow-hidden"
                 >
-                  <motion.div
-                    aria-hidden
-                    className="absolute inset-0"
-                    style={{ background: category.gradient }}
-                    whileHover={{ scale: 1.08 }}
-                    transition={{ duration: 0.8, ease: EASE }}
+                  {/* Background glow on hover */}
+                  <div
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+                    style={{ background: project.gradient }}
                   />
 
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/28 to-black/14" />
+                  {/* Content row */}
+                  <div
+                    className="relative flex items-center gap-6 py-8 md:py-10 border-t border-white/[0.06] transition-all duration-500"
+                    style={{ opacity: isDimmed ? 0.3 : 1 }}
+                  >
+                    {/* Number */}
+                    <span className="font-mono-custom text-[11px] text-white/20 w-8 shrink-0">
+                      {project.num}
+                    </span>
 
-                  <motion.div
-                    aria-hidden
-                    className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full blur-2xl"
-                    style={{ backgroundColor: category.glow, opacity: 0 }}
-                    whileHover={{ opacity: 1 }}
-                    transition={{ duration: 0.35, ease: EASE }}
-                  />
-
-                  <div className="relative z-10 flex h-full flex-col justify-between">
-                    <div>
-                      <p className="font-mono-custom text-[10px] uppercase tracking-[0.22em] text-white/60">
-                        Category {String(i + 1).padStart(2, "0")}
+                    {/* Title + subtitle */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-display text-[clamp(1.5rem,3vw,2.8rem)] font-bold text-white leading-[1] tracking-tight group-hover:translate-x-2 transition-transform duration-500">
+                        {project.title}
+                      </h3>
+                      <p className="mt-2 font-body text-[13px] text-white/35 group-hover:text-white/55 transition-colors duration-500">
+                        {project.subtitle}
                       </p>
-                      <motion.h3
-                        className="mt-4 font-body text-[clamp(1.65rem,3.2vw,2.6rem)] font-semibold leading-[1.02] tracking-tight text-white"
-                        whileHover={{ color: "rgba(255,255,255,1)" }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        {category.title}
-                      </motion.h3>
-                      <motion.p
-                        className={`mt-4 max-w-[34ch] font-body text-[14px] leading-relaxed text-white/72 transition-all duration-300 ${
-                          expanded ? "max-h-40 opacity-100" : "max-h-24 opacity-90"
-                        }`}
-                        whileHover={{ color: "rgba(255,255,255,0.94)" }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        {category.description}
-                      </motion.p>
                     </div>
 
-                    <div className="mt-8 inline-flex min-h-[44px] w-fit items-center gap-2 rounded-full border border-white/[0.22] bg-black/20 px-4 py-2 font-mono-custom text-[11px] uppercase tracking-[0.16em] text-white/88">
-                      {expanded ? "Tap again to open" : "Explore"}
-                      <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={2.2} />
+                    {/* Tags — hidden on mobile */}
+                    <div className="hidden lg:flex items-center gap-2 shrink-0">
+                      {project.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 font-mono-custom text-[9px] uppercase tracking-[0.12em] text-white/35"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Arrow */}
+                    <div
+                      className="flex items-center justify-center w-12 h-12 rounded-full border border-white/[0.08] shrink-0 group-hover:border-white/20 group-hover:bg-white/[0.05] transition-all duration-500"
+                    >
+                      <ArrowUpRight
+                        className="w-4 h-4 text-white/40 group-hover:text-white transition-all duration-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                        strokeWidth={2}
+                      />
                     </div>
                   </div>
-                </MotionLink>
+
+                  {/* Accent line that reveals on hover */}
+                  <motion.div
+                    className="absolute bottom-0 left-0 h-[2px] origin-left"
+                    style={{ background: project.accent }}
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: isHovered ? 1 : 0 }}
+                    transition={{ duration: 0.6, ease: EASE }}
+                  />
+                </Link>
               </motion.div>
             );
           })}
         </div>
+
+        {/* Bottom divider */}
+        <div className="border-t border-white/[0.06] mt-0" />
       </div>
     </section>
   );

@@ -1,108 +1,146 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence, useMotionValueEvent, useScroll } from "framer-motion";
 
-const navLinks = ["Work", "About", "Contact"];
+const navLinks = [
+  { label: "Work", id: "work" },
+  { label: "Experience", id: "experience" },
+  { label: "About", id: "about" },
+  { label: "Contact", id: "contact" },
+];
+
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 const Header = () => {
-  const [activeSection, setActiveSection] = useState("");
+  const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const lastY = useRef(0);
+  const { scrollY } = useScroll();
 
-  useEffect(() => {
-    let rafId: number | null = null;
-
-    const handleScroll = () => {
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => {
-        const sections = ["work", "about", "contact"];
-        for (const id of sections.reverse()) {
-          const el = document.getElementById(id);
-          if (el && el.getBoundingClientRect().top <= 200) {
-            setActiveSection(id);
-            return;
-          }
-        }
-        setActiveSection("");
-      });
-    };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      if (rafId) cancelAnimationFrame(rafId);
-    };
-  }, []);
+  useMotionValueEvent(scrollY, "change", (y) => {
+    const diff = y - lastY.current;
+    setHidden(diff > 8 && y > 200);
+    setScrolled(y > 60);
+    lastY.current = y;
+  });
 
   const scrollTo = (id: string) => {
     setMobileOpen(false);
-    document.getElementById(id.toLowerCase())?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full z-[100]">
-        <div className="container-custom flex items-center justify-between h-16 sm:h-18 lg:h-20">
-          <a href="#home" className="font-mono-custom uppercase text-[12px] tracking-[0.15em] text-foreground">
-            <span className="font-bold">Portfolio,</span> Sandesh
-          </a>
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <button
-                key={link}
-                onClick={() => scrollTo(link)}
-                className="font-mono-custom uppercase text-[11px] tracking-[0.15em] text-muted-foreground hover:text-primary transition-smooth relative"
-              >
-                {activeSection === link.toLowerCase() && (
-                  <span className="absolute -left-3 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-primary" />
-                )}
-                {link}
-              </button>
-            ))}
-          </nav>
-          {/* Mobile hamburger */}
-          <button
-            className="md:hidden flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.03]"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label={mobileOpen ? "Close menu" : "Open menu"}
-          >
-            <span className="flex flex-col gap-1.5">
-              <span className={`block w-5 h-[1px] bg-foreground transition-all duration-300 ${mobileOpen ? "rotate-45 translate-y-[3.5px]" : ""}`} />
-              <span className={`block w-5 h-[1px] bg-foreground transition-all duration-300 ${mobileOpen ? "-rotate-45 -translate-y-[3.5px]" : ""}`} />
-            </span>
-          </button>
-        </div>
-      </header>
+      <motion.header
+        initial={{ y: -100 }}
+        animate={{ y: hidden ? -100 : 0 }}
+        transition={{ duration: 0.5, ease: EASE }}
+        className="fixed top-0 left-0 w-full z-[100]"
+      >
+        <div
+          className="transition-all duration-500"
+          style={{
+            background: scrolled
+              ? "rgba(9,9,9,0.72)"
+              : "transparent",
+            backdropFilter: scrolled ? "blur(20px) saturate(1.4)" : "none",
+            borderBottom: scrolled ? "1px solid rgba(255,255,255,0.05)" : "1px solid transparent",
+          }}
+        >
+          <div className="container-custom flex items-center justify-between h-[72px] lg:h-[80px]">
+            {/* Logo */}
+            <motion.a
+              href="#home"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: EASE }}
+              className="flex items-center gap-3"
+            >
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-white/15 to-white/5 border border-white/10 flex items-center justify-center">
+                <span className="font-display text-[15px] font-bold text-white">S</span>
+              </div>
+              <span className="font-display text-[14px] font-medium text-white/90 hidden sm:block">
+                Sandesh Gadakh
+              </span>
+            </motion.a>
 
-      {/* Mobile overlay */}
+            {/* Desktop nav */}
+            <motion.nav
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4, ease: EASE }}
+              className="hidden md:flex items-center gap-1"
+            >
+              {navLinks.map((link) => (
+                <button
+                  key={link.id}
+                  onClick={() => scrollTo(link.id)}
+                  className="relative px-4 py-2 font-body text-[13px] font-medium text-white/55 hover:text-white transition-colors duration-300 group"
+                >
+                  {link.label}
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-0 h-[1.5px] bg-[hsl(var(--primary))] group-hover:w-[60%] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]" />
+                </button>
+              ))}
+              <a
+                href="mailto:gadakhsandesh@gmail.com"
+                className="ml-4 px-5 py-2.5 rounded-full bg-white text-[#090909] font-body text-[12px] font-semibold tracking-[-0.01em] hover:bg-white/90 transition-colors duration-300"
+              >
+                Get in touch
+              </a>
+            </motion.nav>
+
+            {/* Mobile hamburger */}
+            <button
+              className="md:hidden flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.04]"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            >
+              <span className="flex flex-col gap-[5px]">
+                <span className={`block w-5 h-[1.5px] bg-white transition-all duration-300 ${mobileOpen ? "rotate-45 translate-y-[3.25px]" : ""}`} />
+                <span className={`block w-5 h-[1.5px] bg-white transition-all duration-300 ${mobileOpen ? "-rotate-45 -translate-y-[3.25px]" : ""}`} />
+              </span>
+            </button>
+          </div>
+        </div>
+      </motion.header>
+
+      {/* Full-screen mobile overlay */}
       <AnimatePresence>
         {mobileOpen && (
-          <>
-            <motion.div
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-[99] bg-[#090909]/95 backdrop-blur-xl flex flex-col items-center justify-center"
+            onClick={() => setMobileOpen(false)}
+          >
+            <nav className="flex flex-col items-center gap-2">
+              {navLinks.map((link, i) => (
+                <motion.button
+                  key={link.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  transition={{ duration: 0.5, delay: i * 0.08, ease: EASE }}
+                  onClick={(e) => { e.stopPropagation(); scrollTo(link.id); }}
+                  className="font-display text-[2.5rem] font-bold text-white/90 hover:text-[hsl(var(--primary))] transition-colors py-2"
+                >
+                  {link.label}
+                </motion.button>
+              ))}
+            </nav>
+            <motion.a
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[99] bg-black/60 backdrop-blur-sm"
-              onClick={() => setMobileOpen(false)}
-            />
-            <motion.aside
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              className="fixed right-0 top-0 z-[100] h-screen w-[82%] max-w-[360px] border-l border-white/10 bg-[#0a0a0a] px-6 pt-24"
+              transition={{ delay: 0.4 }}
+              href="mailto:gadakhsandesh@gmail.com"
+              className="mt-10 px-8 py-3.5 rounded-full bg-white text-[#090909] font-body text-[14px] font-semibold"
+              onClick={(e) => e.stopPropagation()}
             >
-              <nav className="flex flex-col gap-4">
-                {navLinks.map((link) => (
-                  <button
-                    key={link}
-                    onClick={() => scrollTo(link)}
-                    className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-4 text-left font-body text-lg text-white transition-smooth active:scale-[0.98]"
-                  >
-                    {link}
-                  </button>
-                ))}
-              </nav>
-            </motion.aside>
-          </>
+              Get in touch
+            </motion.a>
+          </motion.div>
         )}
       </AnimatePresence>
     </>

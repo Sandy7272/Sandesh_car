@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 
 const capabilities = [
@@ -10,235 +10,168 @@ const capabilities = [
   { num: "06", title: "UI/UX Design", tags: ["Figma", "Photoshop", "Illustrator", "Motion UI"] },
 ];
 
-const CountUpNumber = ({ target, prefix }: { target: string; prefix: string }) => {
-  const [display, setDisplay] = useState(prefix);
-  const ref = useRef<HTMLSpanElement>(null);
+const stats = [
+  { value: "50+", label: "Projects Delivered" },
+  { value: "5+", label: "Years Experience" },
+  { value: "70%", label: "Pipeline Automated" },
+  { value: "3×", label: "Best Employee" },
+];
 
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const EASE = [0.22, 1, 0.36, 1] as const;
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          if (reducedMotion) {
-            setDisplay(target);
-            return;
-          }
-          const numPart = parseInt(target);
-          const suffix = target.replace(/\d+/, "");
-          const duration = 800;
-          const start = performance.now();
-          const animate = (now: number) => {
-            const progress = Math.min((now - start) / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
-            const current = Math.round(eased * numPart);
-            setDisplay(String(current).padStart(2, "0"));
-            if (progress < 1) requestAnimationFrame(animate);
-            else setDisplay(target);
-          };
-          requestAnimationFrame(animate);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.5 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [target]);
-
-  return <span ref={ref}>{display}</span>;
-};
-
-const CapabilityCard = ({
-  cap,
-  index,
-  active,
-  onActivate,
-  onDeactivate,
-}: {
-  cap: (typeof capabilities)[0];
-  index: number;
-  active: boolean;
-  onActivate: (index: number) => void;
-  onDeactivate: () => void;
-}) => {
+const CapabilityCard = ({ cap, index }: { cap: (typeof capabilities)[0]; index: number }) => {
   const cardRef = useRef<HTMLDivElement>(null);
-  const rxRef = useRef(0);
-  const ryRef = useRef(0);
-  const rafRef = useRef<number | null>(null);
-
-  const setTilt = useCallback((rx: number, ry: number) => {
-    const el = cardRef.current;
-    if (!el) return;
-    rxRef.current = rx;
-    ryRef.current = ry;
-    el.style.setProperty("--rx", `${rx.toFixed(2)}deg`);
-    el.style.setProperty("--ry", `${ry.toFixed(2)}deg`);
-  }, []);
 
   const onMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!active) return;
     const el = cardRef.current;
     if (!el) return;
     const r = el.getBoundingClientRect();
     const px = (e.clientX - r.left) / r.width;
     const py = (e.clientY - r.top) / r.height;
-    const nextRy = (px - 0.5) * 8; // rotateY
-    const nextRx = (0.5 - py) * 6; // rotateX
-
-    if (rafRef.current) window.cancelAnimationFrame(rafRef.current);
-    rafRef.current = window.requestAnimationFrame(() => setTilt(nextRx, nextRy));
-  }, [active, setTilt]);
+    el.style.setProperty("--rx", `${((0.5 - py) * 8).toFixed(2)}deg`);
+    el.style.setProperty("--ry", `${((px - 0.5) * 8).toFixed(2)}deg`);
+  }, []);
 
   const onLeave = useCallback(() => {
-    if (rafRef.current) window.cancelAnimationFrame(rafRef.current);
-    rafRef.current = null;
-    setTilt(0, 0);
-    onDeactivate();
-  }, [onDeactivate, setTilt]);
+    const el = cardRef.current;
+    if (!el) return;
+    el.style.setProperty("--rx", "0deg");
+    el.style.setProperty("--ry", "0deg");
+  }, []);
 
   return (
-    <div className="relative h-full">
-      <motion.div
-        layout
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.7, delay: index * 0.08, ease: EASE }}
+    >
+      <div
         ref={cardRef}
-        onMouseEnter={() => onActivate(index)}
         onMouseMove={onMove}
         onMouseLeave={onLeave}
-        whileHover={{ scale: 1.05 }}
-        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-        className="group relative h-full rounded-2xl border border-white/[0.10] bg-white/[0.03] p-7 md:p-8 overflow-hidden flex flex-col"
+        className="group relative h-full rounded-2xl border border-white/[0.06] bg-white/[0.02] p-7 md:p-8 overflow-hidden hover:border-white/[0.12] transition-all duration-500 cursor-default"
         style={{
           transformStyle: "preserve-3d",
-          transform: "perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))",
-          boxShadow: active
-            ? "0 30px 90px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.06)"
-            : "0 24px 70px rgba(0,0,0,0.45)",
+          transform: "perspective(800px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))",
           willChange: "transform",
+          transition: "transform 0.15s ease-out, border-color 0.5s",
         }}
       >
-        {/* glow */}
+        {/* Hover glow */}
         <div
-          aria-hidden
-          className="pointer-events-none absolute -inset-24 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+          className="pointer-events-none absolute -inset-20 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
           style={{
-            background:
-              "radial-gradient(circle at 35% 30%, rgba(255,255,255,0.14) 0%, transparent 55%), radial-gradient(circle at 70% 70%, hsl(var(--primary) / 0.2) 0%, transparent 60%)",
+            background: "radial-gradient(circle at 40% 30%, rgba(255,255,255,0.06) 0%, transparent 50%)",
           }}
         />
 
-        {/* border highlight */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-          style={{
-            boxShadow: "inset 0 0 0 1px hsl(var(--primary) / 0.32)",
-          }}
-        />
+        {/* Number */}
+        <span className="font-mono-custom text-[10px] text-white/15 tracking-[0.2em]">
+          {cap.num}
+        </span>
 
-        {/* number */}
-        <div className="flex items-start justify-between gap-4">
-          <span className="font-mono-custom text-[10px] uppercase tracking-[0.22em] text-white/30">
-            <CountUpNumber target={cap.num} prefix="00" />
-          </span>
-          <motion.span
-            className="font-mono-custom text-[10px] uppercase tracking-[0.22em] text-white/40"
-            initial={false}
-            animate={active ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 }}
-            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-          >
-            View →
-          </motion.span>
-        </div>
-
-        {/* title */}
-        <h3 className="mt-4 font-body text-[18px] md:text-[19px] font-semibold tracking-tight text-white">
+        {/* Title */}
+        <h3 className="mt-4 font-display text-[18px] md:text-[20px] font-bold text-white tracking-tight">
           {cap.title}
         </h3>
 
-        {/* tags */}
-        <div className="mt-5 flex flex-wrap gap-2">
+        {/* Tags */}
+        <div className="mt-5 flex flex-wrap gap-1.5">
           {cap.tags.map((tag) => (
             <span
               key={tag}
-              className="rounded-full border border-white/[0.10] bg-white/[0.04] px-3 py-1.5 font-mono-custom text-[10px] uppercase tracking-[0.14em] text-white/55"
+              className="rounded-full border border-white/[0.06] bg-white/[0.02] px-3 py-1.5 font-mono-custom text-[9px] uppercase tracking-[0.12em] text-white/30"
             >
               {tag}
             </span>
           ))}
         </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const Capabilities = () => (
+  <section className="relative bg-[#090909] py-24 md:py-32 lg:py-40 overflow-hidden">
+    {/* Subtle glow */}
+    <div
+      className="pointer-events-none absolute inset-0"
+      style={{
+        background: "radial-gradient(900px 500px at 20% 50%, hsl(var(--primary) / 0.06) 0%, transparent 60%)",
+      }}
+    />
+
+    <div className="container-custom relative">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8, ease: EASE }}
+        className="mb-16 md:mb-20"
+      >
+        <p className="section-label mb-4">Capabilities</p>
+        <h2 className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-bold leading-[0.95] text-white">
+          What I<br />
+          <span className="text-white/30">build</span>
+        </h2>
       </motion.div>
 
-      {/* Active indicator line */}
-      {active && (
-        <motion.div
-          layoutId="capActiveLine"
-          className="pointer-events-none absolute left-5 right-5 -bottom-2 h-[2px] rounded-full"
-          style={{
-            background:
-              "linear-gradient(90deg, rgba(255,255,255,0) 0%, hsl(var(--primary) / 0.8) 35%, rgba(255,255,255,0) 100%)",
-            filter: "blur(0px)",
-          }}
-          transition={{ type: "spring", stiffness: 380, damping: 32 }}
-        />
-      )}
-    </div>
-  );
-};
-
-const Capabilities = () => {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const reduceMotion = useMemo(
-    () => (typeof window !== "undefined" ? window.matchMedia("(prefers-reduced-motion: reduce)").matches : true),
-    []
-  );
-
-  return (
-    <section className="section-padding relative overflow-hidden">
-      {/* background */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(1200px 600px at 20% 20%, hsl(var(--primary) / 0.12) 0%, transparent 60%), radial-gradient(1000px 520px at 80% 70%, rgba(120, 80, 255, 0.10) 0%, transparent 65%)",
-        }}
-      />
-      <div className="container-custom relative">
-        <div className="mb-10 md:mb-14 max-w-2xl">
-          <p className="section-label mb-3">Capabilities</p>
-          <h2 className="font-body text-[clamp(2.1rem,5.6vw,4.1rem)] font-semibold leading-[1.05] tracking-tight text-white mb-3">
-            What I Build
-          </h2>
-          <p className="font-body text-[14px] leading-relaxed text-white/55">
-            End-to-end 3D production, realtime experiences, and product-ready visuals — optimized for web and motion.
-          </p>
-        </div>
-
-        <div
-          className="relative"
-          style={{
-            perspective: reduceMotion ? "none" : "1200px",
-          }}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-7 auto-rows-fr">
-            {capabilities.map((cap, i) => (
-              <CapabilityCard
-                key={cap.num}
-                cap={cap}
-                index={i}
-                active={activeIndex === i}
-                onActivate={(idx) => setActiveIndex(idx)}
-                onDeactivate={() => setActiveIndex(null)}
-              />
-            ))}
-          </div>
-        </div>
+      {/* Capability grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+        {capabilities.map((cap, i) => (
+          <CapabilityCard key={cap.num} cap={cap} index={i} />
+        ))}
       </div>
-    </section>
-  );
-};
+
+      {/* Stats row */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8, ease: EASE }}
+        className="mt-16 md:mt-20 grid grid-cols-2 md:grid-cols-4 gap-px rounded-2xl overflow-hidden border border-white/[0.06]"
+      >
+        {stats.map((stat, i) => (
+          <div
+            key={i}
+            className="bg-white/[0.02] p-6 md:p-8 text-center hover:bg-white/[0.04] transition-colors duration-500"
+          >
+            <p className="font-display text-[clamp(2rem,4vw,3.5rem)] font-bold text-white leading-none">
+              {stat.value}
+            </p>
+            <p className="mt-2 font-mono-custom text-[9px] uppercase tracking-[0.18em] text-white/30">
+              {stat.label}
+            </p>
+          </div>
+        ))}
+      </motion.div>
+
+      {/* Clients row */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8, delay: 0.2, ease: EASE }}
+        className="mt-12 md:mt-16"
+      >
+        <p className="font-mono-custom text-[10px] uppercase tracking-[0.2em] text-white/20 mb-5 text-center">
+          Trusted By
+        </p>
+        <div className="flex flex-wrap justify-center gap-2">
+          {["L&T Realty", "Kesari Weddings", "Ultraviolette", "Byju's", "Tata", "IBW 2025", "Italica", "Material Depot"].map((name) => (
+            <span
+              key={name}
+              className="font-body text-[12px] border border-white/[0.06] text-white/25 px-4 py-2 rounded-full hover:border-white/15 hover:text-white/45 transition-all duration-400 cursor-default"
+            >
+              {name}
+            </span>
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  </section>
+);
 
 export default Capabilities;
