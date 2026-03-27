@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { AnimatedSection, StaggerContainer, StaggerItem } from "./AnimatedSection";
 
 const projects = [
   {
@@ -52,98 +53,79 @@ const Work = () => {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   return (
-    <section id="work" className="relative bg-[#090909] py-24 md:py-32 lg:py-40">
+    <section id="work" className="relative bg-background py-24 md:py-32 lg:py-40">
       <div className="container-custom">
-        {/* Section header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.3 }}
-          transition={{ duration: 0.8, ease: EASE }}
-          className="mb-16 md:mb-20 flex flex-col md:flex-row md:items-end justify-between gap-6"
-        >
+        <AnimatedSection className="mb-16 md:mb-20 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <p className="section-label mb-4">Selected Work</p>
-            <h2 className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-bold leading-[0.95] text-white">
+            <h2 className="font-display text-[clamp(2.5rem,5vw,4.5rem)] font-bold leading-[0.95] text-foreground">
               Work that<br />
-              <span className="text-white/30">speaks volumes</span>
+              <span className="text-foreground/30">speaks volumes</span>
             </h2>
           </div>
-          <p className="font-body text-[14px] text-white/40 max-w-[320px] leading-relaxed">
+          <p className="font-body text-[14px] text-foreground/40 max-w-[320px] leading-relaxed">
             Explore by category — each opens a focused workspace with projects and deeper detail.
           </p>
-        </motion.div>
+        </AnimatedSection>
 
-        {/* Project list — editorial stacked rows */}
-        <div className="space-y-[1px]">
-          {projects.map((project, i) => {
+        <StaggerContainer className="space-y-[1px]" staggerDelay={0.08}>
+          {projects.map((project) => {
             const isHovered = hoveredId === project.id;
             const isDimmed = hoveredId !== null && !isHovered;
 
             return (
-              <motion.div
-                key={project.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.7, delay: i * 0.08, ease: EASE }}
-              >
+              <StaggerItem key={project.id}>
                 <Link
                   to={project.href}
                   onMouseEnter={() => setHoveredId(project.id)}
                   onMouseLeave={() => setHoveredId(null)}
                   className="group relative block overflow-hidden"
                 >
-                  {/* Background glow on hover */}
                   <div
                     className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
                     style={{ background: project.gradient }}
                   />
 
-                  {/* Content row */}
                   <div
-                    className="relative flex items-center gap-6 py-8 md:py-10 border-t border-white/[0.06] transition-all duration-500"
-                    style={{ opacity: isDimmed ? 0.3 : 1 }}
+                    className="relative flex items-center gap-6 py-8 md:py-10 border-t border-foreground/[0.06] transition-all duration-500"
+                    style={{
+                      opacity: isDimmed ? 0.3 : 1,
+                      willChange: "opacity",
+                    }}
                   >
-                    {/* Number */}
-                    <span className="font-mono-custom text-[11px] text-white/20 w-8 shrink-0">
+                    <span className="font-mono-custom text-[11px] text-foreground/20 w-8 shrink-0">
                       {project.num}
                     </span>
 
-                    {/* Title + subtitle */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-display text-[clamp(1.5rem,3vw,2.8rem)] font-bold text-white leading-[1] tracking-tight group-hover:translate-x-2 transition-transform duration-500">
+                      <h3 className="font-display text-[clamp(1.5rem,3vw,2.8rem)] font-bold text-foreground leading-[1] tracking-tight group-hover:translate-x-2 transition-transform duration-500"
+                        style={{ willChange: "transform" }}>
                         {project.title}
                       </h3>
-                      <p className="mt-2 font-body text-[13px] text-white/35 group-hover:text-white/55 transition-colors duration-500">
+                      <p className="mt-2 font-body text-[13px] text-foreground/35 group-hover:text-foreground/55 transition-colors duration-500">
                         {project.subtitle}
                       </p>
                     </div>
 
-                    {/* Tags — hidden on mobile */}
                     <div className="hidden lg:flex items-center gap-2 shrink-0">
                       {project.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1.5 font-mono-custom text-[9px] uppercase tracking-[0.12em] text-white/35"
+                          className="rounded-full border border-foreground/[0.08] bg-foreground/[0.03] px-3 py-1.5 font-mono-custom text-[9px] uppercase tracking-[0.12em] text-foreground/35"
                         >
                           {tag}
                         </span>
                       ))}
                     </div>
 
-                    {/* Arrow */}
-                    <div
-                      className="flex items-center justify-center w-12 h-12 rounded-full border border-white/[0.08] shrink-0 group-hover:border-white/20 group-hover:bg-white/[0.05] transition-all duration-500"
-                    >
+                    <div className="flex items-center justify-center w-12 h-12 rounded-full border border-foreground/[0.08] shrink-0 group-hover:border-foreground/20 group-hover:bg-foreground/[0.05] transition-all duration-500">
                       <ArrowUpRight
-                        className="w-4 h-4 text-white/40 group-hover:text-white transition-all duration-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                        className="w-4 h-4 text-foreground/40 group-hover:text-foreground transition-all duration-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
                         strokeWidth={2}
                       />
                     </div>
                   </div>
 
-                  {/* Accent line that reveals on hover */}
                   <motion.div
                     className="absolute bottom-0 left-0 h-[2px] origin-left"
                     style={{ background: project.accent }}
@@ -152,13 +134,12 @@ const Work = () => {
                     transition={{ duration: 0.6, ease: EASE }}
                   />
                 </Link>
-              </motion.div>
+              </StaggerItem>
             );
           })}
-        </div>
+        </StaggerContainer>
 
-        {/* Bottom divider */}
-        <div className="border-t border-white/[0.06] mt-0" />
+        <div className="border-t border-foreground/[0.06] mt-0" />
       </div>
     </section>
   );
