@@ -1,0 +1,200 @@
+/* ArtStation-style overlay */
+.work-detail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.work-detail-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(10px);
+}
+
+.work-detail-panel {
+  position: relative;
+  width: min(1200px, 100%);
+  max-height: min(86vh, 920px);
+  overflow: auto;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(10, 10, 12, 0.92);
+  box-shadow: 0 35px 120px rgba(0, 0, 0, 0.75);
+  border-radius: 16px;
+}
+
+.work-detail-top {
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+  padding: 22px 22px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.work-detail-meta {
+  max-width: 760px;
+}
+
+.work-detail-kicker {
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.work-detail-title {
+  font-size: 34px;
+  line-height: 1.06;
+  font-weight: 550;
+  margin: 10px 0 8px;
+}
+
+.work-detail-overview {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 300;
+  line-height: 1.6;
+  margin: 0 0 14px;
+}
+
+.work-detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.work-detail-tag {
+  font-size: 12px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.work-detail-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.work-detail-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.82);
+  text-decoration: none;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  transition: 0.25s;
+}
+.work-detail-link:hover {
+  border-color: rgba(94, 234, 212, 0.35);
+  box-shadow: 0 0 0 1px rgba(94, 234, 212, 0.15) inset, 0 20px 60px rgba(0, 0, 0, 0.45);
+}
+
+.work-detail-close {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.25s;
+  flex: 0 0 auto;
+}
+.work-detail-close:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.work-detail-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 0.9fr;
+  gap: 22px;
+  padding: 18px 22px 22px;
+}
+
+.work-detail-gallery {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.work-detail-hero {
+  grid-column: 1 / -1;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.work-detail-thumb {
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.work-detail-media {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.work-detail-side {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.work-detail-block {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 14px 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.work-detail-block h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.7;
+  font-weight: 500;
+}
+
+.work-detail-block p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 300;
+  line-height: 1.55;
+}
+
+.work-detail-block ul {
+  margin: 0;
+  padding-left: 18px;
+  color: rgba(255, 255, 255, 0.72);
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+@media (max-width: 920px) {
+  .work-detail-grid {
+    grid-template-columns: 1fr;
+  }
+  .work-detail-gallery {
+    grid-template-columns: 1fr;
+  }
+  .work-detail-title {
+    font-size: 28px;
+  }
+}
+

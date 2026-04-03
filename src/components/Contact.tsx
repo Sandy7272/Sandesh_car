@@ -1,133 +1,84 @@
-import { motion } from "framer-motion";
-import { ArrowUpRight } from "lucide-react";
-import { AnimatedSection } from "./AnimatedSection";
+import { MdArrowOutward, MdCopyright } from "react-icons/md";
+import "./styles/Contact.css";
+import { resume } from "../data/resume";
 
-const EASE = [0.22, 1, 0.36, 1] as const;
-
-const Contact = () => (
-  <section id="contact" className="relative bg-background py-24 md:py-32 lg:py-40">
-    <div className="container-custom">
-      <AnimatedSection scale>
-        <div className="relative overflow-hidden rounded-[2rem] md:rounded-[2.5rem]">
-          <div
-            className="absolute inset-0"
-            style={{
-              background: "linear-gradient(135deg, #f5f0eb 0%, #e8e3dd 40%, #ddd8d2 100%)",
-            }}
-          />
-
-          <div
-            className="pointer-events-none absolute -right-[15%] top-[10%] h-[80%] w-[50%] rounded-full opacity-30"
-            style={{
-              background: "radial-gradient(circle, rgba(232,168,73,0.4) 0%, transparent 60%)",
-              filter: "blur(60px)",
-            }}
-          />
-          <div
-            className="pointer-events-none absolute -left-[10%] bottom-[5%] h-[60%] w-[40%] rounded-full opacity-20"
-            style={{
-              background: "radial-gradient(circle, rgba(162,155,254,0.4) 0%, transparent 60%)",
-              filter: "blur(50px)",
-            }}
-          />
-
-          <div className="relative z-10 p-10 md:p-16 lg:p-20">
-            <div className="max-w-2xl">
-              <motion.p
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, ease: EASE }}
-                className="font-mono-custom text-[10px] uppercase tracking-[0.2em] text-[#090909]/40 mb-6"
+const Contact = () => {
+  return (
+    <div className="contact-section section-container" id="contact">
+      <div className="contact-container">
+        <h3>Contact</h3>
+        <div className="contact-flex">
+          <div className="contact-box">
+            <h4>Connect</h4>
+            <p>
+              <a
+                href={resume.links.linkedin}
+                target="_blank"
+                rel="noreferrer"
+                data-cursor="disable"
               >
-                Get in touch
-              </motion.p>
-
-              <motion.h2
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: 0.1, ease: EASE }}
-                className="font-display text-[clamp(2.2rem,5vw,4rem)] font-bold leading-[1.05] tracking-tight text-[#090909]"
-              >
-                Let's build something
-                <br />
-                <span className="text-[#090909]/35">extraordinary together</span>
-              </motion.h2>
-
-              <motion.p
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.7, delay: 0.2, ease: EASE }}
-                className="mt-6 font-body text-[15px] md:text-[16px] leading-relaxed text-[#090909]/50 max-w-lg"
-              >
-                Have something that needs exceptional 3D, motion, or creative technology?
-                I'd love to hear what you're building.
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.7, delay: 0.3, ease: EASE }}
-                className="mt-10"
-              >
-                <a
-                  href="mailto:gadakhsandesh@gmail.com"
-                  className="group inline-flex items-center gap-3 rounded-full bg-[#090909] px-8 py-4 md:px-10 md:py-5 font-body text-[14px] md:text-[15px] font-semibold text-white shadow-[0_20px_60px_rgba(0,0,0,0.3)] transition-all duration-500 hover:shadow-[0_30px_80px_rgba(0,0,0,0.4)] hover:scale-[1.02]"
-                  style={{ willChange: "transform, box-shadow" }}
-                >
-                  Contact Me
-                  <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1" strokeWidth={2.2} />
-                </a>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.7, delay: 0.45, ease: EASE }}
-                className="mt-10 flex flex-wrap items-center gap-x-5 gap-y-2"
-              >
-                <a
-                  href="mailto:gadakhsandesh@gmail.com"
-                  className="font-mono-custom text-[11px] uppercase tracking-[0.12em] text-[#090909]/40 hover:text-[#090909]/70 transition-colors"
-                >
-                  gadakhsandesh@gmail.com
-                </a>
-                <span className="text-[#090909]/20">·</span>
-                <a
-                  href="tel:+917447337272"
-                  className="font-mono-custom text-[11px] uppercase tracking-[0.12em] text-[#090909]/40 hover:text-[#090909]/70 transition-colors"
-                >
-                  +91 74473 37272
-                </a>
-                <span className="text-[#090909]/20">·</span>
-                <a
-                  href="https://www.linkedin.com/in/sandesh-gadakh"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-mono-custom text-[11px] uppercase tracking-[0.12em] text-[#090909]/40 hover:text-[#090909]/70 transition-colors"
-                >
-                  LinkedIn
-                </a>
-                <span className="text-[#090909]/20">·</span>
-                <a
-                  href="https://github.com/Sandy7272"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-mono-custom text-[11px] uppercase tracking-[0.12em] text-[#090909]/40 hover:text-[#090909]/70 transition-colors"
-                >
-                  GitHub
-                </a>
-              </motion.div>
-            </div>
+                LinkedIn — sandesh-gadakh
+              </a>
+            </p>
+            <p>
+              <a href={`mailto:${resume.email}`} data-cursor="disable">
+                {resume.email}
+              </a>
+            </p>
+            <p>
+              <a href={`tel:${resume.phone.replace(/[^+\d]/g, "")}`} data-cursor="disable">
+                {resume.phone}
+              </a>
+            </p>
+            <h4>Education</h4>
+            {resume.education.map((ed) => (
+              <p key={`${ed.title}-${ed.when}`}>
+                {ed.title}, {ed.org} — {ed.when}
+              </p>
+            ))}
+          </div>
+          <div className="contact-box">
+            <h4>Social</h4>
+            <a
+              href="https://github.com/Sandy7272"
+              target="_blank"
+              rel="noreferrer"
+              data-cursor="disable"
+              className="contact-social"
+            >
+              GitHub <MdArrowOutward />
+            </a>
+            <a
+              href={resume.links.linkedin}
+              target="_blank"
+              rel="noreferrer"
+              data-cursor="disable"
+              className="contact-social"
+            >
+              LinkedIn <MdArrowOutward />
+            </a>
+            <a
+              href="https://www.instagram.com/sandesh_gadakh/"
+              target="_blank"
+              rel="noreferrer"
+              data-cursor="disable"
+              className="contact-social"
+            >
+              Instagram <MdArrowOutward />
+            </a>
+          </div>
+          <div className="contact-box">
+            <h2>
+              Designed and Developed <br /> by <span>Sandesh Gadakh</span>
+            </h2>
+            <h5>
+              <MdCopyright /> 2026
+            </h5>
           </div>
         </div>
-      </AnimatedSection>
+      </div>
     </div>
-  </section>
-);
+  );
+};
 
 export default Contact;

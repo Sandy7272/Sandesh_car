@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Sandesh Gadakh — Resume</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Segoe UI',Arial,Helvetica,sans-serif;
+  font-size:11pt;line-height:1.6;
+  color:#1a1a1a;background:#fff;
+  max-width:816px;margin:0 auto;
+  padding:48px 56px;
+}
+a{color:#0066cc;text-decoration:none;}
+a:hover{color:#0044aa;text-decoration:underline;}
+
+/* HEADER */
+.header{margin-bottom:26px;border-bottom:2px solid #1a1a1a;padding-bottom:16px;}
+.name{font-size:28pt;font-weight:700;letter-spacing:-0.01em;line-height:1;}
+.title{font-size:11.5pt;color:#555;margin-top:5px;font-weight:400;}
+.contacts{
+  display:flex;flex-wrap:wrap;gap:0;margin-top:12px;
+  font-size:9.5pt;color:#444;
+  align-items:center;
+}
+.contacts span{display:inline-flex;align-items:center;}
+.contacts span::after{content:' | ';margin:0 10px;color:#bbb;}
+.contacts span:last-child::after{content:'';}
+
+/* SECTIONS */
+.section{margin-bottom:24px;}
+.section-head{
+  font-size:9.5pt;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;
+  color:#1a1a1a;border-bottom:1px solid #ccc;padding-bottom:4px;margin-bottom:14px;
+}
+
+/* SUMMARY */
+.summary{font-size:10.5pt;color:#333;line-height:1.7;}
+
+/* EXPERIENCE */
+.exp-block{margin-bottom:20px;}
+.exp-header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px;}
+.exp-company{font-weight:700;font-size:11.5pt;}
+.exp-period{font-size:9.5pt;color:#666;}
+.exp-role{font-size:10.5pt;color:#444;margin-bottom:8px;}
+.exp-list{padding-left:18px;list-style:disc;}
+.exp-list li{font-size:10.5pt;color:#333;margin-bottom:5px;line-height:1.6;}
+.exp-list li strong{color:#1a1a1a;}
+
+/* SKILLS */
+.skills-list{width:100%;}
+.skill-row{display:flex;gap:0;padding:5px 0;font-size:10.5pt;}
+.skill-cat{font-weight:600;white-space:nowrap;min-width:180px;color:#1a1a1a;flex-shrink:0;}
+.skill-val{color:#333;}
+
+/* PROJECTS */
+.proj-block{margin-bottom:16px;}
+.proj-name{font-weight:700;font-size:11pt;}
+.proj-sub{font-size:9.5pt;color:#666;margin-bottom:5px;}
+.proj-desc{font-size:10.5pt;color:#333;line-height:1.6;}
+
+/* EDUCATION / CERTS */
+.edu-block{margin-bottom:12px;}
+.edu-deg{font-weight:600;font-size:11pt;}
+.edu-school{font-size:10.5pt;color:#444;}
+.edu-period{font-size:9.5pt;color:#888;}
+
+/* PAGE 2 — screen preview */
+@media screen{
+  .page-break{
+    margin-top:60px;
+    border-top:2px dashed #ccc;
+    padding-top:40px;
+    position:relative;
+  }
+  .page-break::before{
+    content:'— Page 2 —';
+    position:absolute;
+    top:-12px;left:50%;
+    transform:translateX(-50%);
+    background:#fff;
+    padding:0 12px;
+    font-size:8pt;color:#aaa;
+    letter-spacing:0.1em;
+  }
+}
+
+/* PAGE 2 — print */
+@media print{
+  body{padding:36px 48px;font-size:10.5pt;}
+  @page{size:A4;margin:0;}
+  a{color:#0066cc;text-decoration:none;}
+  .page-break{page-break-before:always;padding-top:36px;}
+}
+
+.no-print{
+  position:fixed;bottom:24px;right:24px;
+  background:#1a1a1a;color:#fff;border:none;
+  padding:12px 24px;border-radius:100px;
+  font-size:13px;cursor:pointer;letter-spacing:0.05em;
+  font-family:inherit;
+  box-shadow:0 8px 24px rgba(0,0,0,0.2);
+}
+.no-print:hover{background:#333;}
+@media print{.no-print{display:none;}}
+</style>
+</head>
+<body>
+
+<!-- ========== PAGE 1 ========== -->
+
+<div class="header">
+  <div class="name">Sandesh Gadakh</div>
+  <div class="title">Product Builder · Creative Technologist · 3D Generalist</div>
+  <div class="contacts">
+    <span>Pune, Maharashtra, India</span>
+    <span><a href="mailto:gadakhsandesh@gmail.com">gadakhsandesh@gmail.com</a></span>
+    <span><a href="tel:+917447337272">+91-7447337272</a></span>
+    <span><a href="https://www.linkedin.com/in/sandesh-gadakh-41863b210/" target="_blank">linkedin.com/in/sandesh-gadakh</a></span>
+    <span><a href="https://github.com/Sandy7272" target="_blank">github.com/Sandy7272</a></span>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-head">Professional Summary</div>
+  <p class="summary">
+    Results-driven Product Builder and Creative Technologist with 4+ years of experience spanning 3D design, motion graphics, AI-driven workflows, and product development. Proven track record of transforming early-stage systems into production-grade platforms — delivering 50+ client projects across real estate, education, and e-commerce sectors. Recognized for a 70% reduction in manual operations, 3× Best Employee Award at Byju's, and awarded equity for exceptional contributions at MetaShop AI. Expert in Gaussian Splatting, NeRF, Unreal Engine, Blender, and leveraging AI tools to build and automate complex workflows. Thrives in 0-to-1 environments requiring rapid execution, creative problem-solving, and high-impact delivery.
+  </p>
+</div>
+
+<div class="section">
+  <div class="section-head">Work Experience</div>
+
+  <div class="exp-block">
+    <div class="exp-header">
+      <span class="exp-company">MetaShop AI</span>
+      <span class="exp-period">January 2023 – Present · Pune, India</span>
+    </div>
+    <div class="exp-role">Product Builder &amp; Creative Operations Lead</div>
+    <ul class="exp-list">
+      <li>Architected and delivered company's <strong>first client-facing self-service product</strong> — an AI-powered website with integrated custom 3D viewer — built using React, Three.js, and AI-assisted development tools.</li>
+      <li>Transformed an early-stage video-to-3D pipeline into an <strong>enterprise-grade production system</strong> within 12 months using Gaussian Splatting, NeRF (Nerfstudio), and Image-to-3D techniques.</li>
+      <li>Automated complete 3D model generation pipeline — including data processing, training execution, and output export — reducing manual operational workload by <strong>70%</strong> and scaling team output 3×.</li>
+      <li>Owned complete 3D production lifecycle from data capture to final client delivery; coordinated on-ground teams including videographers and drone operators for 3D reconstruction projects.</li>
+      <li>Managed and delivered <strong>50+ client projects</strong> end-to-end across real estate and manufacturing sectors — including L&amp;T Realty and Kesari Weddings — enabling enterprise adoption of 3D visualization.</li>
+      <li>Leveraged AI-assisted tools to build and iterate website components, enhanced UI/UX, and created 3D marketing visuals to support client acquisition.</li>
+      <li>Awarded <strong>equity stake by founder</strong> in recognition of exceptional product and operational contributions — one of the earliest team members to receive ownership in the company.</li>
+    </ul>
+  </div>
+
+  <div class="exp-block">
+    <div class="exp-header">
+      <span class="exp-company">Byju's (Think &amp; Learn Pvt. Ltd.)</span>
+      <span class="exp-period">October 2021 – January 2023 · Bangalore, India</span>
+    </div>
+    <div class="exp-role">Motion Graphics Artist &amp; 3D Specialist</div>
+    <ul class="exp-list">
+      <li>Developed high-quality motion graphics and 3D educational content consumed by <strong>millions of students</strong> across India.</li>
+      <li>Designed reusable animation systems and template libraries improving content production efficiency by <strong>40%</strong> across 100+ modules.</li>
+      <li>Collaborated with design and product teams to enhance visual storytelling and user engagement.</li>
+      <li>Received <strong>Best Employee Award 3 consecutive times</strong> among 400+ design team members for quality, speed, and innovation.</li>
+    </ul>
+  </div>
+
+  <div class="exp-block">
+    <div class="exp-header">
+      <span class="exp-company">Global Studio (Freelance)</span>
+      <span class="exp-period">January 2020 – September 2021 · Pune, India</span>
+    </div>
+    <div class="exp-role">Freelance 3D Assets &amp; VFX Specialist</div>
+    <ul class="exp-list">
+      <li>Created versatile 3D models, VFX assets, and motion graphics for gaming and commercial clients using Blender, 3D Studio Max, and Maya.</li>
+      <li>Managed end-to-end freelance pipeline with a <strong>100% on-time delivery</strong> record across gaming and commercial projects.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ========== PAGE 2 ========== -->
+<div class="page-break">
+
+<div class="section">
+  <div class="section-head">Key Projects</div>
+
+  <div class="proj-block">
+    <div class="proj-name">AI-Powered E-Commerce Website &amp; 3D Viewer</div>
+    <div class="proj-sub">MetaShop AI · 2024 · React, Three.js, Tailwind CSS, AI-assisted development</div>
+    <div class="proj-desc">Built a responsive website with real-time 3D product visualization. The company's first self-service product enabling customers to independently customize and interact with 3D models.</div>
+  </div>
+
+  <div class="proj-block">
+    <div class="proj-name">Enterprise 3D Production Pipeline</div>
+    <div class="proj-sub">MetaShop AI · 2023 · Blender, Nerfstudio, Gaussian Splatting, 3D Studio Max, Substance Painter</div>
+    <div class="proj-desc">Rebuilt video-to-3D rendering pipeline from scratch into a production-grade system using NeRF and Gaussian Fields research; onboarded real estate clients L&amp;T Realty and Kesari Weddings.</div>
+  </div>
+
+  <div class="proj-block">
+    <div class="proj-name">Operations Automation Infrastructure</div>
+    <div class="proj-sub">MetaShop AI · 2023 · AI Tools, Process Automation, Workflow Design</div>
+    <div class="proj-desc">Designed file tracking system and automated processing workflows, eliminating 70% of repetitive manual operations and enabling the team to scale output 3×.</div>
+  </div>
+
+  <div class="proj-block">
+    <div class="proj-name">STEM Educational Content System</div>
+    <div class="proj-sub">Byju's · 2022 · After Effects, Blender, Maya, Premiere Pro</div>
+    <div class="proj-desc">Delivered 100+ animated learning modules; engineered template system reducing per-module production time by 40% across a team of 15+ designers.</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-head">Skills &amp; Tools</div>
+  <div class="skills-list">
+    <div class="skill-row"><span class="skill-cat">3D &amp; Real-time</span><span class="skill-val">Blender, 3D Studio Max, Maya, Unreal Engine, Nerfstudio, Gaussian Splatting, Three.js, Substance Painter, Environment &amp; Level Design, Game Engine Integration</span></div>
+    <div class="skill-row"><span class="skill-cat">Motion &amp; Design</span><span class="skill-val">After Effects, Premiere Pro, Figma, Photoshop, Illustrator, UI/UX Design, 2.5D &amp; 3D Animation, Digital Illustration</span></div>
+    <div class="skill-row"><span class="skill-cat">Web &amp; Automation</span><span class="skill-val">React, Three.js, Tailwind CSS, REST APIs, AI-assisted Development, Workflow Automation, Process Optimization</span></div>
+    <div class="skill-row"><span class="skill-cat">AI &amp; Emerging Tech</span><span class="skill-val">Gaussian Fields, NeRF, Image-to-3D, AI-Powered Product Development, Rapid Prototyping, Creative AI Workflows, R&amp;D (AI-Driven Techniques)</span></div>
+    <div class="skill-row"><span class="skill-cat">Product &amp; Operations</span><span class="skill-val">Product Development (0-to-1), Workflow Design, Client Management, Project Delivery, Cross-functional Collaboration</span></div>
+    <div class="skill-row"><span class="skill-cat">Languages</span><span class="skill-val">English · Hindi · Marathi</span></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-head">Education</div>
+  <div class="edu-block">
+    <div class="edu-deg">B.Sc. Media Graphics &amp; Animation</div>
+    <div class="edu-school">Srajan College of Design · Pune University, Pune</div>
+    <div class="edu-period">2019 – 2021</div>
+  </div>
+  <div class="edu-block">
+    <div class="edu-deg">Diploma in Computer Animation</div>
+    <div class="edu-school">Srajan College of Design, Pune</div>
+    <div class="edu-period">Completed August 2021</div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-head">Certifications &amp; Awards</div>
+  <div class="edu-block">
+    <div class="edu-deg">Adobe Certified Professional</div>
+    <div class="edu-school">Graphic Design using Illustrator · Photoshop</div>
+  </div>
+  <div class="edu-block">
+    <div class="edu-deg">Best Employee Award — 3×</div>
+    <div class="edu-school">Byju's Think &amp; Learn Pvt. Ltd. · Recognized for innovative visual solutions · 2021–2023</div>
+  </div>
+  <div class="edu-block">
+    <div class="edu-deg">Equity Award</div>
+    <div class="edu-school">MetaShop AI · Awarded for exceptional product and operational contributions · 2024</div>
+  </div>
+</div>
+
+</div>
+
+<a class="no-print" href="/resume.pdf" download="Sandesh_Gadakh_Resume.pdf">⬇ Download PDF</a>
+<button class="no-print" style="right: 210px" onclick="window.print()">Print</button>
+</body>
+</html>
+
