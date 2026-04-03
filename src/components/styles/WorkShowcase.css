@@ -1,0 +1,231 @@
+/* ── Work Showcase ── */
+.work-showcase {
+  position: relative;
+  z-index: 1;
+  background-color: var(--backgroundColor);
+  padding: 100px 0 80px;
+}
+
+.work-showcase-inner {
+  max-width: var(--cMaxWidth);
+  width: var(--cWidth);
+  margin: auto;
+}
+
+.work-showcase-title {
+  font-size: clamp(40px, 6vw, 72px);
+  font-weight: 500;
+  margin: 0 0 40px;
+  line-height: 1.1;
+}
+
+.work-showcase-title > span {
+  color: var(--accentColor);
+}
+
+/* ── Tabs ── */
+.work-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 50px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 0;
+}
+
+.work-tab {
+  position: relative;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: color 0.3s;
+  text-transform: uppercase;
+}
+
+.work-tab:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.work-tab-active {
+  color: #fff;
+}
+
+.work-tab-indicator {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accentColor);
+  border-radius: 2px 2px 0 0;
+}
+
+/* ── Grid ── */
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 28px;
+}
+
+.work-card-large {
+  grid-column: span 2;
+}
+
+/* ── Card ── */
+.work-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  transition: border-color 0.4s, box-shadow 0.4s;
+  will-change: transform;
+}
+
+.work-card:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.6);
+}
+
+/* Card Media */
+.work-card-media {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.work-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.work-card:hover .work-card-media img {
+  transform: scale(1.06);
+}
+
+.work-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.4s;
+  backdrop-filter: blur(2px);
+}
+
+.work-card:hover .work-card-overlay {
+  opacity: 1;
+}
+
+.work-card-view {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  color: #fff;
+  padding: 12px 24px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.work-card:hover .work-card-view {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--accentColor);
+}
+
+/* Card Info */
+.work-card-info {
+  padding: 20px 22px 24px;
+}
+
+.work-card-category {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.5;
+  font-weight: 500;
+}
+
+.work-card-title {
+  font-size: 20px;
+  font-weight: 550;
+  margin: 6px 0 4px;
+  line-height: 1.25;
+}
+
+.work-card-subtitle {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 14px;
+  font-weight: 300;
+}
+
+.work-card-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.work-card-tool {
+  font-size: 11px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 400;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .work-card-large {
+    grid-column: span 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .work-showcase {
+    padding: 60px 0 50px;
+  }
+
+  .work-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .work-tabs {
+    gap: 2px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .work-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .work-tab {
+    font-size: 12px;
+    padding: 10px 14px;
+    white-space: nowrap;
+  }
+
+  .work-card-info {
+    padding: 16px 18px 20px;
+  }
+
+  .work-card-title {
+    font-size: 18px;
+  }
+}
