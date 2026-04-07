@@ -2,6 +2,7 @@ import { lazy, PropsWithChildren, Suspense, useEffect, useState } from "react";
 import About from "./About";
 import Career from "./Career";
 import Contact from "./Contact";
+import { CinematicFooter } from "./ui/motion-footer";
 import Cursor from "./Cursor";
 import Landing from "./Landing";
 import Navbar from "./Navbar";
@@ -50,6 +51,7 @@ const MainContainer = ({ children }: PropsWithChildren) => {
               </Suspense>
             )}
             <Contact />
+            <CinematicFooter />
           </div>
         </div>
       </div>
