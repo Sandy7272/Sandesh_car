@@ -6,6 +6,7 @@
   position: relative;
   z-index: 1;
   background-color: var(--backgroundColor);
+<<<<<<< HEAD
   padding: 100px 0 120px;
 }
 
@@ -38,11 +39,50 @@
 
 /* ── Grid ── */
 .work-cat-grid {
+=======
+  padding: 100px 0;
+}
+
+.work-container {
+  margin: auto;
+}
+
+.work-header {
+  margin-bottom: 60px;
+}
+
+.work-kicker {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--accentColor);
+  display: block;
+  margin-bottom: 16px;
+}
+
+.work-header h2 {
+  font-size: 56px;
+  font-weight: 500;
+  margin: 0 0 16px;
+  line-height: 1.1;
+}
+
+.work-subtitle {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+  max-width: 500px;
+}
+
+/* ── Category Grid ── */
+.work-category-grid {
+>>>>>>> 128591712244bdc8736831dd58920d98227e584b
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
 }
 
+<<<<<<< HEAD
 /* ── Category Card ── */
 .work-cat-card {
   position: relative;
@@ -245,3 +285,159 @@
   .work-cat-info { padding: 16px 18px 22px; }
   .work-cat-label { font-size: 20px; }
 }
+=======
+.work-category-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  aspect-ratio: 4 / 3;
+}
+
+.work-category-card.is-hovered {
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.6),
+              0 0 40px -10px rgba(94, 234, 212, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.work-card-image {
+  position: absolute;
+  inset: 0;
+}
+
+.work-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              filter 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.work-category-card.is-hovered .work-card-image img {
+  transform: scale(1.08);
+  filter: brightness(0.7);
+}
+
+.work-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.9) 0%,
+    rgba(0, 0, 0, 0.4) 50%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+}
+
+.work-card-content {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 28px;
+}
+
+.work-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.work-card-count {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 6px 14px;
+  border-radius: 100px;
+  backdrop-filter: blur(8px);
+}
+
+.work-card-arrow {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #fff;
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translate3d(0, 0, 0) rotate(-45deg);
+}
+
+.work-category-card.is-hovered .work-card-arrow {
+  background: var(--accentColor);
+  color: #000;
+  transform: translate3d(0, 0, 0) rotate(0deg);
+}
+
+.work-card-bottom h3 {
+  font-size: 28px;
+  font-weight: 600;
+  margin: 0 0 4px;
+  line-height: 1.2;
+}
+
+.work-card-sub {
+  font-size: 15px;
+  color: var(--accentColor);
+  margin: 0 0 8px;
+  font-weight: 400;
+}
+
+.work-card-desc {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.45);
+  margin: 0;
+  line-height: 1.5;
+  max-width: 380px;
+  transition: opacity 0.4s ease;
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.work-category-card.is-hovered .work-card-desc {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.5s 0.1s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.5s 0.1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── Responsive ── */
+@media only screen and (max-width: 900px) {
+  .work-section {
+    padding: 60px 0;
+  }
+
+  .work-header h2 {
+    font-size: 36px;
+  }
+
+  .work-category-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .work-category-card {
+    aspect-ratio: 16 / 10;
+  }
+
+  .work-card-bottom h3 {
+    font-size: 22px;
+  }
+
+  .work-card-desc {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+>>>>>>> 128591712244bdc8736831dd58920d98227e584b
