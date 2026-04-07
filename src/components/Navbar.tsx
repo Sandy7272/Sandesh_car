@@ -8,7 +8,11 @@ import "./styles/Navbar.css";
 gsap.registerPlugin(ScrollSmoother, ScrollTrigger);
 export let smoother: ScrollSmoother;
 
+import { useLoading } from "../context/LoadingProvider";
+
 const Navbar = () => {
+  const { isLoading } = useLoading();
+
   useEffect(() => {
     smoother = ScrollSmoother.create({
       wrapper: "#smooth-wrapper",
@@ -21,24 +25,38 @@ const Navbar = () => {
     });
 
     smoother.scrollTop(0);
-    smoother.paused(true);
+    
+    // Only pause if we are in the initial loading state
+    if (isLoading) {
+      smoother.paused(true);
+    } else {
+      smoother.paused(false);
+      document.body.style.overflowY = "auto";
+      document.getElementsByTagName("main")[0]?.classList.add("main-active");
+    }
 
-    let links = document.querySelectorAll(".header ul a");
-    links.forEach((elem) => {
-      let element = elem as HTMLAnchorElement;
-      element.addEventListener("click", (e) => {
-        if (window.innerWidth > 1024) {
-          e.preventDefault();
-          let elem = e.currentTarget as HTMLAnchorElement;
-          let section = elem.getAttribute("data-href");
-          smoother.scrollTo(section, true, "top top");
-        }
-      });
-    });
-    window.addEventListener("resize", () => {
+    const handleResize = () => {
       ScrollSmoother.refresh(true);
-    });
-  }, []);
+    };
+    
+    window.addEventListener("resize", handleResize);
+    
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      if (smoother) {
+        smoother.kill();
+      }
+    };
+  }, [isLoading]);
+
+  const handleScroll = (e: React.MouseEvent<HTMLAnchorElement>, section: string) => {
+    if (window.innerWidth > 1024) {
+      e.preventDefault();
+      if (smoother) {
+        smoother.scrollTo(section, true, "top top");
+      }
+    }
+  };
   return (
     <>
       <div className="header">
@@ -56,17 +74,17 @@ const Navbar = () => {
         </a>
         <ul>
           <li>
-            <a data-href="#about" href="#about">
+            <a href="#about" onClick={(e) => handleScroll(e, "#about")}>
               <HoverLinks text="ABOUT" />
             </a>
           </li>
           <li>
-            <a data-href="#work" href="#work">
+            <a href="#work" onClick={(e) => handleScroll(e, "#work")}>
               <HoverLinks text="WORK" />
             </a>
           </li>
           <li>
-            <a data-href="#contact" href="#contact">
+            <a href="#contact" onClick={(e) => handleScroll(e, "#contact")}>
               <HoverLinks text="CONTACT" />
             </a>
           </li>

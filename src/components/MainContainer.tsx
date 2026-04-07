@@ -8,6 +8,7 @@ import Navbar from "./Navbar";
 import SocialIcons from "./SocialIcons";
 import WhatIDo from "./WhatIDo";
 import Work from "./Work";
+import WorkDetailPage from "./WorkDetailPage";
 import setSplitText from "./utils/splitText";
 
 const TechStack = lazy(() => import("./TechStack"));
@@ -52,6 +53,7 @@ const MainContainer = ({ children }: PropsWithChildren) => {
           </div>
         </div>
       </div>
+      <WorkDetailPage />
     </div>
   );
 };

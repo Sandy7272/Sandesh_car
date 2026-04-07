@@ -13,12 +13,12 @@ import {
 
 const textureLoader = new THREE.TextureLoader();
 const imageUrls = [
+  "/images/blender.png",
+  "/images/unreal.png",
+  "/images/premiere.png",
+  "/images/aftereffects.png",
+  "/images/figma.png",
   "/images/react2.webp",
-  "/images/next2.webp",
-  "/images/node2.webp",
-  "/images/express.webp",
-  "/images/mongo.webp",
-  "/images/mysql.webp",
   "/images/typescript.webp",
   "/images/javascript.webp",
 ];

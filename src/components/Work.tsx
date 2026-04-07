@@ -1,134 +1,121 @@
-import { useMemo, useState, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
+import { MdArrowOutward } from "react-icons/md";
+import { workCategories } from "../data/workPortfolio";
 import "./styles/Work.css";
-import WorkImage from "./WorkImage";
-import { MdArrowBack, MdArrowForward } from "react-icons/md";
-import WorkDetailModal from "./WorkDetailModal";
-import { workItems } from "../data/workItems";
 
 const Work = () => {
-  const projects = useMemo(
-    () =>
-      workItems.map((w) => ({
-        id: w.id,
-        title: w.title,
-        category: w.category,
-        tools: w.tools,
-        image: w.cover.kind === "image" ? w.cover.src : w.cover.poster ?? "",
-        link: w.links?.[0]?.href ?? "#",
-      })),
-    []
-  );
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [openId, setOpenId] = useState<string | null>(null);
+  const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
 
-  const selected = openId ? workItems.find((w) => w.id === openId) : null;
+  /* Navigate to detail page */
+  const openCategory = (slug: string) => {
+    window.dispatchEvent(new CustomEvent("open-work-detail", { detail: slug }));
+  };
 
-  const goToSlide = useCallback(
-    (index: number) => {
-      if (isAnimating) return;
-      setIsAnimating(true);
-      setCurrentIndex(index);
-      setTimeout(() => setIsAnimating(false), 500);
-    },
-    [isAnimating]
-  );
+  /* Parallax tilt on hover */
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>, slug: string) => {
+    const card = e.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 12;
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * -12;
+    card.style.transform = `perspective(800px) rotateY(${x}deg) rotateX(${y}deg) scale(1.02)`;
+    setHoveredSlug(slug);
+  };
 
-  const goToPrev = useCallback(() => {
-    const newIndex =
-      currentIndex === 0 ? projects.length - 1 : currentIndex - 1;
-    goToSlide(newIndex);
-  }, [currentIndex, goToSlide]);
+  const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.currentTarget.style.transform = "";
+    setHoveredSlug(null);
+  };
 
-  const goToNext = useCallback(() => {
-    const newIndex =
-      currentIndex === projects.length - 1 ? 0 : currentIndex + 1;
-    goToSlide(newIndex);
-  }, [currentIndex, goToSlide]);
+  /* Intersection Observer for scroll reveal */
+  useEffect(() => {
+    const cards = sectionRef.current?.querySelectorAll(".work-cat-card");
+    if (!cards) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            (entry.target as HTMLElement).classList.add("work-cat-card--visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15 }
+    );
+    cards.forEach((c) => observer.observe(c));
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <div className="work-section" id="work">
+    <div className="work-section" id="work" ref={sectionRef}>
       <div className="work-container section-container">
-        <h2>
-          My <span>Work</span>
-        </h2>
+        <div className="work-header">
+          <h2>
+            My <span>Work</span>
+          </h2>
+          <p className="work-subtitle">
+            Explore my creative universe — from polygons to pixels
+          </p>
+        </div>
 
-        <div className="carousel-wrapper">
-          {/* Navigation Arrows */}
-          <button
-            className="carousel-arrow carousel-arrow-left"
-            onClick={goToPrev}
-            aria-label="Previous project"
-            data-cursor="disable"
-          >
-            <MdArrowBack />
-          </button>
-          <button
-            className="carousel-arrow carousel-arrow-right"
-            onClick={goToNext}
-            aria-label="Next project"
-            data-cursor="disable"
-          >
-            <MdArrowForward />
-          </button>
+        <div className="work-cat-grid">
+          {workCategories.map((cat, i) => {
+            const isHovered = hoveredSlug === cat.slug;
+            return (
+              <div
+                className={`work-cat-card work-cat-card--${cat.slug}`}
+                key={cat.slug}
+                style={
+                  {
+                    "--cat-accent": cat.accent,
+                    "--cat-delay": `${i * 0.12}s`,
+                  } as React.CSSProperties
+                }
+                onMouseMove={(e) => handleMouseMove(e, cat.slug)}
+                onMouseLeave={handleMouseLeave}
+                onClick={() => openCategory(cat.slug)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === "Enter" && openCategory(cat.slug)}
+                data-cursor="disable"
+              >
+                {/* Glow backdrop */}
+                <div
+                  className="work-cat-glow"
+                  style={{ opacity: isHovered ? 1 : 0 }}
+                />
 
-          {/* Slides */}
-          <div className="carousel-track-container">
-            <div
-              className="carousel-track"
-              style={{
-                transform: `translateX(-${currentIndex * 100}%)`,
-              }}
-            >
-              {projects.map((project, index) => (
-                <div className="carousel-slide" key={index}>
-                  <div className="carousel-content">
-                    <div className="carousel-info">
-                      <div className="carousel-number">
-                        <h3>0{index + 1}</h3>
-                      </div>
-                      <div className="carousel-details">
-                        <h4>{project.title}</h4>
-                        <p className="carousel-category">
-                          {project.category}
-                        </p>
-                        <div className="carousel-tools">
-                          <span className="tools-label">Tools & Features</span>
-                          <p>{project.tools}</p>
-                        </div>
-                      </div>
+                {/* Thumbnail mosaic */}
+                <div className="work-cat-mosaic">
+                  {cat.pieces.slice(0, 3).map((p, j) => (
+                    <div
+                      className={`work-cat-thumb work-cat-thumb--${j}`}
+                      key={p.id}
+                    >
+                      <img src={p.thumbnail} alt={p.title} loading="lazy" />
                     </div>
-                    <div className="carousel-image-wrapper">
-                      <WorkImage
-                        image={project.image}
-                        alt={project.title}
-                        link={project.link}
-                        onOpen={() => setOpenId(project.id)}
-                      />
-                    </div>
+                  ))}
+                </div>
+
+                {/* Card info */}
+                <div className="work-cat-info">
+                  <span className="work-cat-icon">{cat.icon}</span>
+                  <h3 className="work-cat-label">{i + 1}. {cat.label}</h3>
+                  <p className="work-cat-tagline">{cat.tagline}</p>
+                  <div className="work-cat-count">
+                    {cat.pieces.length} projects
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
 
-          {/* Dot Indicators */}
-          <div className="carousel-dots">
-            {projects.map((_, index) => (
-              <button
-                key={index}
-                className={`carousel-dot ${index === currentIndex ? "carousel-dot-active" : ""
-                  }`}
-                onClick={() => goToSlide(index)}
-                aria-label={`Go to project ${index + 1}`}
-                data-cursor="disable"
-              />
-            ))}
-          </div>
+                {/* Arrow */}
+                <div className="work-cat-arrow">
+                  <MdArrowOutward />
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
-
-      {selected && <WorkDetailModal item={selected} onClose={() => setOpenId(null)} />}
     </div>
   );
 };
