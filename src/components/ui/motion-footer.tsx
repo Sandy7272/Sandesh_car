@@ -201,9 +201,9 @@ const MarqueeItem = () => (
 
 /* ── Social links ── */
 const socialLinks = [
-  { label: "GitHub", href: "https://github.com/Sandy7272", icon: Github },
-  { label: "LinkedIn", href: resume.links.linkedin, icon: Linkedin },
-  { label: "Instagram", href: "https://www.instagram.com/sandesh_gadakh/", icon: Instagram },
+  { label: "GitHub", href: "https://github.com/Sandy7272", icon: FaGithub },
+  { label: "LinkedIn", href: resume.links.linkedin, icon: FaLinkedinIn },
+  { label: "Instagram", href: "https://www.instagram.com/sandesh_gadakh/", icon: FaInstagram },
 ];
 
 /* ── MAIN FOOTER ── */
