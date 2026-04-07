@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { MdArrowOutward } from "react-icons/md";
 import { workCategories } from "../data/workPortfolio";
 import "./styles/Work.css";
@@ -11,23 +11,40 @@ const Work = () => {
     window.dispatchEvent(new CustomEvent("open-work-detail", { detail: slug }));
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>, slug: string) => {
-    const card = e.currentTarget;
-    const rect = card.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 12;
-    const y = ((e.clientY - rect.top) / rect.height - 0.5) * -12;
-    card.style.transform = `perspective(800px) rotateY(${x}deg) rotateX(${y}deg) scale(1.02)`;
-    setHoveredSlug(slug);
-  };
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>, slug: string) => {
+      const card = e.currentTarget;
+      const rect = card.getBoundingClientRect();
+      const px = (e.clientX - rect.left) / rect.width;
+      const py = (e.clientY - rect.top) / rect.height;
+      const x = (px - 0.5) * 10;
+      const y = (py - 0.5) * -10;
 
-  const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.currentTarget.style.transform = "";
-    setHoveredSlug(null);
-  };
+      card.style.transform = `perspective(900px) rotateY(${x}deg) rotateX(${y}deg) scale3d(1.02, 1.02, 1)`;
+      card.style.setProperty("--mouse-x", `${px * 100}%`);
+      card.style.setProperty("--mouse-y", `${py * 100}%`);
+      setHoveredSlug(slug);
+    },
+    []
+  );
+
+  const handleMouseLeave = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      e.currentTarget.style.transform = "";
+      setHoveredSlug(null);
+    },
+    []
+  );
 
   useEffect(() => {
+    const prefersReduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    if (prefersReduced) return;
+
     const cards = sectionRef.current?.querySelectorAll(".work-cat-card");
     if (!cards) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -94,7 +111,9 @@ const Work = () => {
 
                 <div className="work-cat-info">
                   <span className="work-cat-icon">{cat.icon}</span>
-                  <h3 className="work-cat-label">{i + 1}. {cat.label}</h3>
+                  <h3 className="work-cat-label">
+                    {i + 1}. {cat.label}
+                  </h3>
                   <p className="work-cat-tagline">{cat.tagline}</p>
                   <div className="work-cat-count">
                     {cat.pieces.length} projects
