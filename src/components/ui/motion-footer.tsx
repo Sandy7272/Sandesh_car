@@ -5,16 +5,8 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { cn } from "@/lib/utils";
-import {
-  Heart,
-  ArrowUpRight,
-  Github,
-  Linkedin,
-  Instagram,
-  Mail,
-  Phone,
-  ChevronUp,
-} from "lucide-react";
+import { Heart, ArrowUpRight, Mail, Phone, ChevronUp } from "lucide-react";
+import { FaGithub, FaLinkedinIn, FaInstagram } from "react-icons/fa";
 import { resume } from "../../data/resume";
 
 if (typeof window !== "undefined") {
