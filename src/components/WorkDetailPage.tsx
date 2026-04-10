@@ -72,24 +72,43 @@ const PieceCard = ({
   style?: React.CSSProperties;
 }) => {
   const [expanded, setExpanded] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   return (
     <div className={`wdp-piece ${expanded ? "wdp-piece--expanded" : ""}`} style={style}>
+      {/* Live embed */}
+      {piece.liveEmbedUrl && (
+        <div className="wdp-live-embed">
+          <div className="wdp-live-badge">● LIVE DEMO</div>
+          <iframe
+            src={piece.liveEmbedUrl}
+            allow="autoplay; fullscreen; xr-spatial-tracking"
+            allowFullScreen
+            className="wdp-embed"
+          />
+        </div>
+      )}
+
       {/* Thumbnail */}
       <div
-        className="wdp-piece-thumb"
+        className={`wdp-piece-thumb ${!imgLoaded ? "loading" : ""}`}
         onClick={() => onOpenLightbox(piece.gallery.length ? piece.gallery : [{ kind: "image", src: piece.thumbnail }], 0)}
       >
-        <img src={piece.thumbnail} alt={piece.title} loading="lazy" />
+        <img
+          src={piece.thumbnail}
+          alt={piece.title}
+          loading="lazy"
+          onLoad={() => setImgLoaded(true)}
+        />
         <div className="wdp-piece-overlay">
           <span>View Gallery</span>
         </div>
       </div>
 
-      {/* Info */}
+      {/* Info — restructured: subtitle → title → desc → tools → case study → link */}
       <div className="wdp-piece-body">
-        <h3 className="wdp-piece-title">{piece.title}</h3>
         {piece.subtitle && <p className="wdp-piece-subtitle">{piece.subtitle}</p>}
+        <h3 className="wdp-piece-title">{piece.title}</h3>
         <p className="wdp-piece-desc">{piece.description}</p>
 
         <div className="wdp-piece-tools">
@@ -104,10 +123,9 @@ const PieceCard = ({
         {piece.caseStudy && (
           <button
             className="wdp-case-toggle"
-            style={{ color: accent }}
             onClick={() => setExpanded(!expanded)}
           >
-            {expanded ? "Hide case study ▲" : "Read case study ▼"}
+            {expanded ? "Case Study ↑" : "Case Study ↓"}
           </button>
         )}
 
@@ -205,6 +223,7 @@ const WorkDetailPage = () => {
   const [activeSlug, setActiveSlug] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<{ items: MediaItem[]; idx: number } | null>(null);
   const pageRef = useRef<HTMLDivElement>(null);
+  const savedScrollY = useRef(0);
 
   const category: WorkCategory | undefined = activeSlug
     ? getCategoryBySlug(activeSlug)
@@ -214,6 +233,7 @@ const WorkDetailPage = () => {
   useEffect(() => {
     const handler = (e: Event) => {
       const slug = (e as CustomEvent).detail;
+      savedScrollY.current = window.scrollY;
       setActiveSlug(slug);
       document.body.style.overflow = "hidden";
     };
@@ -225,6 +245,10 @@ const WorkDetailPage = () => {
     setActiveSlug(null);
     document.body.style.overflow = "";
     window.location.hash = "";
+    // Restore scroll position
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: savedScrollY.current, behavior: "instant" as ScrollBehavior });
+    });
   }, []);
 
   useEffect(() => {
@@ -243,11 +267,16 @@ const WorkDetailPage = () => {
       ref={pageRef}
       style={{ "--page-accent": category.accent } as React.CSSProperties}
     >
-      {/* Top bar */}
+      {/* Top bar — compact with category label in header */}
       <header className="wdp-header">
         <button className="wdp-back" onClick={close} data-cursor="disable">
           <MdArrowBack /> <span>Back</span>
         </button>
+
+        <div className="wdp-header-cat">
+          <span className="wdp-header-cat-icon">{category.icon}</span>
+          <span className="wdp-header-cat-label">{category.label}</span>
+        </div>
 
         {/* Category tabs */}
         <nav className="wdp-tabs">
@@ -266,7 +295,8 @@ const WorkDetailPage = () => {
               }
               data-cursor="disable"
             >
-              {c.icon} {c.label}
+              <span className="wdp-tab-icon">{c.icon}</span>
+              <span className="wdp-tab-label">{c.label}</span>
             </button>
           ))}
         </nav>
@@ -276,15 +306,7 @@ const WorkDetailPage = () => {
         </button>
       </header>
 
-      {/* Hero */}
-      <div className="wdp-hero">
-        <span className="wdp-hero-icon">{category.icon}</span>
-        <h1 className="wdp-hero-title">{category.label}</h1>
-        <p className="wdp-hero-tagline">{category.tagline}</p>
-        <div className="wdp-hero-line" style={{ background: category.accent }} />
-      </div>
-
-      {/* Grid of pieces */}
+      {/* Grid of pieces — no hero section */}
       <div className="wdp-grid">
         {category.pieces.map((piece, i) => (
           <PieceCard

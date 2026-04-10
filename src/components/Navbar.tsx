@@ -26,7 +26,6 @@ const Navbar = () => {
 
     smoother.scrollTop(0);
     
-    // Only pause if we are in the initial loading state
     if (isLoading) {
       smoother.paused(true);
     } else {
@@ -76,6 +75,11 @@ const Navbar = () => {
           <li>
             <a href="#about" onClick={(e) => handleScroll(e, "#about")}>
               <HoverLinks text="ABOUT" />
+            </a>
+          </li>
+          <li>
+            <a href="#experience" onClick={(e) => handleScroll(e, "#experience")}>
+              <HoverLinks text="EXPERIENCE" />
             </a>
           </li>
           <li>

@@ -17,6 +17,8 @@ export interface WorkPiece {
   gallery: MediaItem[];
   /** Optional external link (Sketchfab, Behance, live site …) */
   externalUrl?: string;
+  /** Optional live embed URL (BabylonJS viewer, YouTube, etc.) */
+  liveEmbedUrl?: string;
   /** Only for UI/UX — case-study fields */
   caseStudy?: {
     problem: string;
@@ -34,26 +36,117 @@ export interface WorkCategory {
   tagline: string;
   accent: string; // CSS colour token per category
   icon: string; // emoji/icon hint
+  featured?: boolean;
+  /** Short metric label shown as a stat pill */
+  metric?: string;
   pieces: WorkPiece[];
 }
 
 /* ── CATEGORIES ─────────────────────────── */
 
 export const workCategories: WorkCategory[] = [
+  /* ▸ VIDEO TO 3D (featured) */
+  {
+    slug: "video-to-3d",
+    label: "Video to 3D",
+    tagline: "L&T Realty · Kesari Resort · Ultraviolette — live web viewers",
+    accent: "#34d399",
+    icon: "📹",
+    featured: true,
+    metric: "Live on web",
+    pieces: [
+      {
+        id: "v2three-01",
+        title: "L&T Realty — Evara Heights",
+        subtitle: "Gaussian Splat virtual tour",
+        description:
+          "L&T needed apartment buyers to feel the space before construction finished. We turned phone video footage into a photorealistic walkthrough that now runs in any browser — no app, no download, no compromise.",
+        thumbnail: "/images/work-v2three-01.png",
+        tools: ["Nerfstudio", "Gaussian Splatting", "BabylonJS"],
+        gallery: [
+          { kind: "image", src: "/images/work-v2three-01.png", alt: "Evara Heights walkthrough" },
+          { kind: "image", src: "/images/work-v2three-02.png", alt: "Detail view" },
+        ],
+        liveEmbedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      },
+      {
+        id: "v2three-02",
+        title: "NeRF Urban Scene Pipeline",
+        subtitle: "Research & development",
+        description:
+          "Built the internal R&D pipeline that takes raw video → trained NeRF → clean mesh export. The system that powers every client delivery at MetaShop AI.",
+        thumbnail: "/images/work-v2three-02.png",
+        tools: ["Nerfstudio", "Blender", "COLMAP"],
+        gallery: [
+          { kind: "image", src: "/images/work-v2three-02.png" },
+          { kind: "image", src: "/images/work-v2three-03.png" },
+        ],
+      },
+      {
+        id: "v2three-03",
+        title: "Kesari Resort — La Cabana",
+        subtitle: "Hospitality virtual tour",
+        description:
+          "Guests book resort rooms they've never visited. This Gaussian Splat tour lets them walk every corner of La Cabana from their phone before they arrive.",
+        thumbnail: "/images/work-v2three-03.png",
+        tools: ["Gaussian Splatting", "BabylonJS", "HTML/CSS"],
+        gallery: [
+          { kind: "image", src: "/images/work-v2three-03.png" },
+          { kind: "image", src: "/images/work-v2three-04.png" },
+        ],
+        liveEmbedUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      },
+      {
+        id: "v2three-04",
+        title: "Product Scan — Photogrammetry Pipeline",
+        subtitle: "Small-object capture pipeline",
+        description:
+          "150+ photos → production-ready 3D model in under 4 hours. Built the capture-to-web pipeline so clients can list products with interactive 3D instead of flat images.",
+        thumbnail: "/images/work-v2three-04.png",
+        tools: ["Meshroom", "Blender", "Three.js"],
+        gallery: [{ kind: "image", src: "/images/work-v2three-04.png" }],
+      },
+      {
+        id: "v2three-05",
+        title: "Rejuve360 — Real Estate Tour",
+        subtitle: "Real estate walkthrough",
+        description:
+          "Full property walkthrough with dual navigation modes: flythrough for presentation, teleport for self-guided exploration. Delivered as an embeddable web URL.",
+        thumbnail: "/images/work-v2three-05.png",
+        tools: ["Gaussian Splatting", "BabylonJS", "WebGL"],
+        gallery: [
+          { kind: "image", src: "/images/work-v2three-05.png" },
+          { kind: "image", src: "/images/work-v2three-06.png" },
+        ],
+      },
+      {
+        id: "v2three-06",
+        title: "AR Product Viewer — WebXR",
+        subtitle: "WebXR-powered",
+        description:
+          "Point your phone at any surface, see the product at real scale with dimension labels overlaid in camera. No app install. Pure web, pure WebXR.",
+        thumbnail: "/images/work-v2three-06.png",
+        tools: ["model-viewer", "WebXR", "Three.js"],
+        gallery: [{ kind: "image", src: "/images/work-v2three-06.png" }],
+      },
+    ],
+  },
+
   /* ▸ 3D WORK */
   {
     slug: "3d",
     label: "3D Work",
-    tagline: "Characters, environments & product renders",
+    tagline: "Byju's · MetaShop AI · freelance client work",
     accent: "#5eead4",
     icon: "🧊",
+    metric: "4+ years",
     pieces: [
       {
         id: "3d-01",
         title: "MetaShop 3D Viewer",
         subtitle: "Interactive product visualisation",
         description:
-          "Real-time WebGL viewer with orbit, zoom and AR-ready rendering. Built for e-commerce clients to showcase products in photorealistic 3D.",
+          "The viewer that powers MetaShop AI's client demos. Real-time orbit, zoom, material switching — built to handle heavy Gaussian Splat models without dropping frames.",
         thumbnail: "/images/work-3d-01.png",
         tools: ["Three.js", "React", "WebGL", "Blender"],
         gallery: [
@@ -131,16 +224,17 @@ export const workCategories: WorkCategory[] = [
   {
     slug: "motion-graphics",
     label: "Motion Graphics Work",
-    tagline: "Animation, titles & explainers",
+    tagline: "Byju's · 100+ modules · 40% faster pipeline",
     accent: "#c084fc",
     icon: "🎬",
+    metric: "100+ modules",
     pieces: [
       {
         id: "mograph-01",
         title: "Educational STEM Module",
         subtitle: "Byju's — learning content",
         description:
-          "Animated science explainer for K-12. Designed a reusable template system that cut production time by 40%.",
+          "Byju's needed STEM content that held a 12-year-old's attention for 8 minutes. Designed a reusable animation template system — 40% faster per module, consistent across a 15-person team.",
         thumbnail: "/images/work-mograph-01.png",
         tools: ["After Effects", "Blender", "Premiere Pro"],
         gallery: [
@@ -210,103 +304,21 @@ export const workCategories: WorkCategory[] = [
     ],
   },
 
-  /* ▸ VIDEO TO 3D */
-  {
-    slug: "video-to-3d",
-    label: "Video to 3D",
-    tagline: "NeRF, Gaussian Splatting & photogrammetry",
-    accent: "#34d399",
-    icon: "📹",
-    pieces: [
-      {
-        id: "v2three-01",
-        title: "L&T Realty — Evara Heights",
-        subtitle: "Gaussian Splat virtual tour",
-        description:
-          "Photorealistic 3D walkthrough generated from drone + phone capture. Deployed as a BabylonJS web viewer with flythrough & teleport navigation.",
-        thumbnail: "/images/work-v2three-01.png",
-        tools: ["Nerfstudio", "Gaussian Splatting", "BabylonJS"],
-        gallery: [
-          { kind: "image", src: "/images/work-v2three-01.png" },
-          { kind: "image", src: "/images/work-v2three-02.png" },
-        ],
-      },
-      {
-        id: "v2three-02",
-        title: "NeRF Scene Reconstruction",
-        subtitle: "Research & development",
-        description:
-          "Experimental NeRF captures of urban scenes — training, quality assessment and mesh export pipeline.",
-        thumbnail: "/images/work-v2three-02.png",
-        tools: ["Nerfstudio", "Blender", "COLMAP"],
-        gallery: [
-          { kind: "image", src: "/images/work-v2three-02.png" },
-          { kind: "image", src: "/images/work-v2three-03.png" },
-        ],
-      },
-      {
-        id: "v2three-03",
-        title: "Kesari Resort — La Cabana",
-        subtitle: "Hospitality virtual tour",
-        description:
-          "Interactive resort experience using Gaussian Splatting with hotspot waypoints and branded UI overlay.",
-        thumbnail: "/images/work-v2three-03.png",
-        tools: ["Gaussian Splatting", "BabylonJS", "HTML/CSS"],
-        gallery: [
-          { kind: "image", src: "/images/work-v2three-03.png" },
-          { kind: "image", src: "/images/work-v2three-04.png" },
-        ],
-      },
-      {
-        id: "v2three-04",
-        title: "Photogrammetry Product Scan",
-        subtitle: "Small-object capture pipeline",
-        description:
-          "High-fidelity 3D model generated from 150+ photos — cleaned, decimated and texture-baked for web deployment.",
-        thumbnail: "/images/work-v2three-04.png",
-        tools: ["Meshroom", "Blender", "Three.js"],
-        gallery: [{ kind: "image", src: "/images/work-v2three-04.png" }],
-      },
-      {
-        id: "v2three-05",
-        title: "Rejuve360 Virtual Tour",
-        subtitle: "Real estate walkthrough",
-        description:
-          "Full property tour with hybrid navigation — flythrough mode for presentation, teleport for self-guided exploration.",
-        thumbnail: "/images/work-v2three-05.png",
-        tools: ["Gaussian Splatting", "BabylonJS", "WebGL"],
-        gallery: [
-          { kind: "image", src: "/images/work-v2three-05.png" },
-          { kind: "image", src: "/images/work-v2three-06.png" },
-        ],
-      },
-      {
-        id: "v2three-06",
-        title: "AR Product Experience",
-        subtitle: "WebXR-powered",
-        description:
-          "Product AR viewer with dimension labels using WebXR hotspots — width, height and depth in cm overlaid in camera view.",
-        thumbnail: "/images/work-v2three-06.png",
-        tools: ["model-viewer", "WebXR", "Three.js"],
-        gallery: [{ kind: "image", src: "/images/work-v2three-06.png" }],
-      },
-    ],
-  },
-
   /* ▸ UI / UX */
   {
     slug: "ui-ux",
     label: "UI UX Work",
-    tagline: "Case studies, dashboards & design systems",
+    tagline: "MetaShop AI · e-commerce · SaaS dashboards",
     accent: "#fb923c",
     icon: "🎨",
+    metric: "3× demos",
     pieces: [
       {
         id: "uiux-01",
         title: "MetaShop AI Website",
         subtitle: "Product marketing site",
         description:
-          "End-to-end website design & build — responsive, fast, conversion-optimised with integrated 3D viewer.",
+          "MetaShop AI had a complex AI + 3D product that nobody outside the team understood. This site made it legible — and tripled demo request volume in the first month.",
         thumbnail: "/images/work-uiux-01.png",
         tools: ["Figma", "React", "Tailwind CSS"],
         gallery: [
@@ -365,7 +377,7 @@ export const workCategories: WorkCategory[] = [
         title: "E-Commerce Redesign",
         subtitle: "Conversion optimisation",
         description:
-          "Full-scale redesign of an e-commerce flow — product listing, detail page, cart and checkout. A/B tested with real users.",
+          "Cart abandonment at 78%. Session recordings showed users bailing at the address step. Redesigned checkout to 3-step with progress indicator and guest option. Abandonment dropped to 52%.",
         thumbnail: "/images/work-uiux-04.png",
         tools: ["Figma", "Hotjar", "Google Analytics"],
         gallery: [
