@@ -2,6 +2,14 @@ import { PropsWithChildren } from "react";
 import "./styles/Landing.css";
 
 const Landing = ({ children }: PropsWithChildren) => {
+  const handleViewWork = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const workSection = document.getElementById("work");
+    if (workSection) {
+      workSection.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <>
       <div className="landing-section" id="landingDiv">
@@ -13,6 +21,25 @@ const Landing = ({ children }: PropsWithChildren) => {
               <br />
               <span>GADAKH</span>
             </h1>
+            <div className="landing-ctas">
+              <a
+                href="#work"
+                className="landing-cta-primary"
+                onClick={handleViewWork}
+                data-cursor="disable"
+              >
+                View My Work
+              </a>
+              <a
+                href="/resume.html"
+                className="landing-cta-secondary"
+                target="_blank"
+                rel="noreferrer"
+                data-cursor="disable"
+              >
+                Download Resume
+              </a>
+            </div>
           </div>
           <div className="landing-info">
             <h3>Technologist &</h3>
