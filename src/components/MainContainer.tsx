@@ -50,7 +50,6 @@ const MainContainer = ({ children }: PropsWithChildren) => {
                 <TechStack />
               </Suspense>
             )}
-            <Contact />
             <CinematicFooter />
           </div>
         </div>

@@ -4,6 +4,7 @@ import * as React from "react";
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Marquee from "react-fast-marquee";
 import { cn } from "@/lib/utils";
 import { Heart, ArrowUpRight, Mail, Phone, ChevronUp } from "lucide-react";
 import { FaGithub, FaLinkedinIn, FaInstagram } from "react-icons/fa";
@@ -53,10 +54,6 @@ const STYLES = `
 
 .animate-footer-breathe {
   animation: footer-breathe 8s ease-in-out infinite alternate;
-}
-
-.animate-footer-scroll-marquee {
-  animation: footer-scroll-marquee 40s linear infinite;
 }
 
 .animate-footer-heartbeat {
@@ -288,12 +285,10 @@ export function CinematicFooter() {
 
         {/* Marquee strip */}
         <div className="relative overflow-hidden py-6" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-          <div className="flex animate-footer-scroll-marquee">
+          <Marquee speed={40} gradient={false} autoFill={true}>
             <MarqueeItem />
             <MarqueeItem />
-            <MarqueeItem />
-            <MarqueeItem />
-          </div>
+          </Marquee>
         </div>
 
         {/* Main content */}
