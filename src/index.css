@@ -57,6 +57,12 @@ a:hover {
   color: var(--accentColor);
 }
 
+:focus-visible {
+  outline: 2px solid var(--accentColor);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
 main {
   opacity: 1;
   transition: 0.3s;

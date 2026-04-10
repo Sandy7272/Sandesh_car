@@ -53,7 +53,6 @@
   -webkit-backdrop-filter: blur(24px);
   overflow: hidden;
   cursor: pointer;
-  will-change: transform;
   display: flex;
   flex-direction: column;
 
@@ -68,6 +67,17 @@
     box-shadow 0.4s ease,
     background 0.4s ease;
 }
+
+/* Featured card spans full width */
+.work-cat-card--featured {
+  grid-column: 1 / -1;
+  min-height: 320px;
+}
+
+.work-cat-card--featured .work-cat-mosaic {
+  height: 280px;
+}
+
 .work-cat-card--visible {
   opacity: 1;
   translate: 0 0;
@@ -80,6 +90,21 @@
     0 0 0 1px color-mix(in srgb, var(--cat-accent) 20%, transparent) inset,
     0 30px 80px -20px rgba(0, 0, 0, 0.7),
     0 0 60px -10px color-mix(in srgb, var(--cat-accent) 8%, transparent);
+}
+
+/* ── Featured badge ── */
+.work-cat-featured-badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 10;
+  background: var(--cat-accent);
+  color: #0a0e17;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 4px 10px;
+  border-radius: 99px;
 }
 
 /* ── Light sweep on hover ── */
@@ -177,6 +202,10 @@
   z-index: 1;
   padding: 20px 24px 28px;
   flex: 1;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.work-cat-card:hover .work-cat-info {
+  transform: translateY(-8px);
 }
 
 .work-cat-icon {
@@ -210,6 +239,22 @@
 }
 .work-cat-card:hover .work-cat-tagline {
   color: rgba(234, 229, 236, 0.65);
+}
+
+/* ── Stat pills ── */
+.work-cat-stats {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.work-cat-stat-pill {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 99px;
+  font-size: 11px;
+  padding: 4px 12px;
+  color: rgba(234, 229, 236, 0.7);
+  letter-spacing: 0.03em;
 }
 
 .work-cat-count {
@@ -271,6 +316,8 @@
   .work-section h2 { font-size: 40px; }
   .work-header { margin-bottom: 36px; }
   .work-cat-grid { grid-template-columns: 1fr; gap: 20px; }
+  .work-cat-card--featured { min-height: auto; }
+  .work-cat-card--featured .work-cat-mosaic { height: 200px; }
   .work-cat-mosaic { height: 200px; }
   .work-cat-card { backdrop-filter: blur(16px); }
 }
