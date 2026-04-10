@@ -395,3 +395,45 @@ h2.landing-info-h2 {
     font-size: 75px;
   }
 }
+
+/* ── CTA Buttons ── */
+.landing-ctas {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  position: relative;
+  z-index: 10;
+}
+.landing-cta-primary {
+  background: var(--accentColor);
+  color: #0a0e17;
+  font-weight: 600;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-size: 14px;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  letter-spacing: 0.02em;
+}
+.landing-cta-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(94, 234, 212, 0.3);
+  color: #0a0e17;
+}
+.landing-cta-secondary {
+  border: 1px solid var(--accentColor);
+  color: var(--accentColor);
+  background: transparent;
+  font-weight: 600;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-size: 14px;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  letter-spacing: 0.02em;
+}
+.landing-cta-secondary:hover {
+  background: rgba(94, 234, 212, 0.08);
+  transform: translateY(-2px);
+  color: var(--accentColor);
+}
