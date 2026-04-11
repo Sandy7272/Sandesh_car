@@ -1,3 +1,6 @@
+/* ═══════════════════════════════════════════
+   CAREER SECTION — Premium Timeline
+   ═══════════════════════════════════════════ */
 .career-section {
   display: flex;
   flex-direction: column;
@@ -7,6 +10,26 @@
   margin: auto;
   margin-bottom: 150px;
   padding: 120px 5%;
+}
+
+/* ── Header ── */
+.career-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.career-kicker {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--accentColor);
+  background: rgba(94, 234, 212, 0.08);
+  border: 1px solid rgba(94, 234, 212, 0.15);
+  padding: 6px 18px;
+  border-radius: 99px;
+  margin-bottom: 24px;
 }
 
 .career-section h2 {
@@ -19,8 +42,8 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   color: transparent;
-  margin-top: 50px;
-  margin-bottom: 90px;
+  margin-top: 0;
+  margin-bottom: 20px;
 }
 
 .career-section h2 > span {
@@ -28,27 +51,80 @@
   font-weight: 300;
 }
 
+.career-header-sub {
+  font-size: 17px;
+  font-weight: 300;
+  color: rgba(234, 229, 236, 0.5);
+  max-width: 560px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* ── Stats Bar ── */
+.career-stats-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  margin-bottom: 80px;
+  padding: 28px 40px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  backdrop-filter: blur(16px);
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.career-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.career-stat-num {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--accentColor);
+  line-height: 1;
+}
+
+.career-stat-label {
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(234, 229, 236, 0.45);
+}
+
+.career-stat-divider {
+  width: 1px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Timeline ── */
 .career-info {
   position: relative;
   display: flex;
   flex-direction: column;
-  margin: 0px auto;
+  margin: 0 auto;
   max-width: 900px;
-  padding-left: 50px; /* Space for the timeline on desktop */
+  padding-left: 50px;
 }
 
-/* Timeline Track */
 .career-timeline-container {
   position: absolute;
-  top: 15px; /* Offset to start around the first dot */
+  top: 15px;
   bottom: 0;
-  left: 20px; /* Position line on the left */
+  left: 20px;
   width: 2px;
-  background: rgba(255, 255, 255, 0.08); /* Faded placeholder line */
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 2px;
 }
 
-/* Timeline Animated Line */
 .career-timeline-line {
   width: 100%;
   height: 0%;
@@ -66,27 +142,46 @@
   padding-bottom: 0;
 }
 
-/* Timeline Dots */
+/* ── Dot ── */
 .career-dot {
   position: absolute;
-  top: 25px; /* Align with header */
-  left: -35.5px; /* Align to the center of the 2px timeline line (left 20px container + 1px center - 35.5) -> Wait, if container is left: 20px and dot is inside the box (which has padding-left: 50px so its 0 is at 50px). 50px - 20px = 30px offset. -30px - center correction. Let's precise: Box left is 50px. Timeline center is at 21px. Distance is 29px. So left: -29px is center of timeline line */
-  left: -35px; /* Fine-tuned later if needed */
-  width: 12px;
-  height: 12px;
+  top: 25px;
+  left: -35px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background-color: #1a1a1a;
   border: 2px solid #444;
   transition: all 0.3s ease;
   z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+.career-dot-ring {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  position: absolute;
+  transition: border-color 0.3s ease;
+}
+
+.career-info-box:hover .career-dot-ring {
+  border-color: rgba(94, 234, 212, 0.2);
+}
+
+/* ── Card ── */
 .career-info-content {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  padding: 35px 40px;
+  padding: 32px 36px;
   border-radius: 16px;
-  transition: transform 0.4s ease, background 0.4s ease, border-color 0.4s ease;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+              background 0.4s ease,
+              border-color 0.4s ease,
+              box-shadow 0.4s ease;
   backdrop-filter: blur(10px);
 }
 
@@ -94,55 +189,61 @@
   background: rgba(255, 255, 255, 0.04);
   transform: translateX(8px);
   border-color: rgba(94, 234, 212, 0.15);
+  box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.4),
+              0 0 40px -10px rgba(94, 234, 212, 0.05);
 }
 
+/* ── Role header ── */
 .career-role-header {
-  margin-bottom: 25px;
+  margin-bottom: 20px;
+}
+
+.career-when {
+  font-size: 12px;
+  color: rgba(234, 229, 236, 0.5);
+  display: inline-block;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 14px;
 }
 
 .career-role-header h3 {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 600;
-  margin: 0 0 8px 0;
+  margin: 0 0 6px 0;
   color: #fff;
   line-height: 1.2;
 }
 
 .career-role-header h4 {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 500;
   color: var(--accentColor);
-  margin: 0 0 12px 0;
-  letter-spacing: 0.5px;
+  margin: 0;
+  letter-spacing: 0.02em;
 }
 
-.career-when {
-  font-size: 15px;
-  color: #999;
-  display: inline-block;
-  letter-spacing: 0.5px;
-  background: rgba(255,255,255,0.05);
-  padding: 6px 12px;
-  border-radius: 20px;
-  text-transform: uppercase;
-  font-weight: 500;
-}
-
+/* ── Highlights ── */
 .career-highlights {
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 0 0 20px;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 12px;
 }
 
 .career-highlights li {
   position: relative;
-  padding-left: 24px;
-  font-size: 16px;
-  color: #cbd5e1;
-  line-height: 1.7;
+  padding-left: 22px;
+  font-size: 15px;
+  color: rgba(203, 213, 225, 0.85);
+  line-height: 1.65;
   font-weight: 300;
 }
 
@@ -150,12 +251,38 @@
   content: "▹";
   position: absolute;
   left: 0;
-  top: -2px;
-  font-size: 18px;
+  top: -1px;
+  font-size: 16px;
   color: var(--accentColor);
 }
 
-/* Responsive adjust */
+/* ── Skill Tags ── */
+.career-skill-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.career-skill-tag {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 99px;
+  border: 1px solid rgba(94, 234, 212, 0.15);
+  background: rgba(94, 234, 212, 0.04);
+  color: rgba(94, 234, 212, 0.75);
+  letter-spacing: 0.03em;
+  transition: all 0.25s ease;
+}
+
+.career-info-content:hover .career-skill-tag {
+  border-color: rgba(94, 234, 212, 0.25);
+  background: rgba(94, 234, 212, 0.08);
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════ */
 @media only screen and (max-width: 1400px) {
   .career-section h2 {
     font-size: 55px;
@@ -171,7 +298,29 @@
   .career-section h2 {
     font-size: 45px;
     line-height: 50px;
-    margin-bottom: 60px;
+  }
+
+  .career-header {
+    margin-bottom: 40px;
+  }
+
+  .career-stats-bar {
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px 24px;
+    margin-bottom: 50px;
+  }
+
+  .career-stat-num {
+    font-size: 28px;
+  }
+
+  .career-stat-divider {
+    display: none;
+  }
+
+  .career-stat-item {
+    min-width: 80px;
   }
 
   .career-info {
@@ -183,12 +332,11 @@
   }
 
   .career-dot {
-    /* (35 - 10) = 25px distance from box edge to line center */
-    left: -30px; 
+    left: -30px;
   }
 
   .career-info-content {
-    padding: 25px;
+    padding: 24px;
   }
 
   .career-role-header h3 {
@@ -196,15 +344,11 @@
   }
 
   .career-role-header h4 {
-    font-size: 18px;
-  }
-
-  .career-when {
-    font-size: 13px;
+    font-size: 16px;
   }
 
   .career-highlights li {
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.6;
   }
 }
@@ -212,5 +356,18 @@
 @media only screen and (max-width: 500px) {
   .career-info-content {
     padding: 20px 15px;
+  }
+
+  .career-stats-bar {
+    gap: 16px;
+    padding: 18px 16px;
+  }
+
+  .career-stat-num {
+    font-size: 24px;
+  }
+
+  .career-stat-label {
+    font-size: 10px;
   }
 }

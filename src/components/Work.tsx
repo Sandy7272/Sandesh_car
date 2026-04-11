@@ -17,8 +17,8 @@ const Work = () => {
       const rect = card.getBoundingClientRect();
       const px = (e.clientX - rect.left) / rect.width;
       const py = (e.clientY - rect.top) / rect.height;
-      const x = (px - 0.5) * 10;
-      const y = (py - 0.5) * -10;
+      const x = (px - 0.5) * 8;
+      const y = (py - 0.5) * -8;
 
       card.style.transform = `perspective(900px) rotateY(${x}deg) rotateX(${y}deg) scale3d(1.02, 1.02, 1)`;
       card.style.setProperty("--mouse-x", `${px * 100}%`);
@@ -71,11 +71,12 @@ const Work = () => {
     <div className="work-section" id="work" ref={sectionRef}>
       <div className="work-container section-container">
         <div className="work-header">
+          <span className="work-kicker">Portfolio</span>
           <h2>
             My <span>Work</span>
           </h2>
           <p className="work-subtitle">
-            Explore my creative universe — from polygons to pixels
+            From concept to production — explore projects across 3D, motion, code, and design.
           </p>
         </div>
 
@@ -106,9 +107,10 @@ const Work = () => {
                 />
 
                 {cat.featured && (
-                  <div className="work-cat-featured-badge">FEATURED</div>
+                  <div className="work-cat-featured-badge">★ FEATURED</div>
                 )}
 
+                {/* Mosaic thumbnails */}
                 <div className="work-cat-mosaic">
                   {cat.pieces.slice(0, 3).map((p, j) => (
                     <div
@@ -118,20 +120,24 @@ const Work = () => {
                       <img src={p.thumbnail} alt={p.title} loading="lazy" />
                     </div>
                   ))}
+                  {/* Gradient overlay */}
+                  <div className="work-cat-mosaic-overlay" />
                 </div>
 
+                {/* Info */}
                 <div className="work-cat-info">
-                  <span className="work-cat-icon">{cat.icon}</span>
-                  <h3 className="work-cat-label">
-                    {i + 1}. {cat.label}
-                  </h3>
+                  <div className="work-cat-info-top">
+                    <span className="work-cat-icon">{cat.icon}</span>
+                    <span className="work-cat-count">{cat.pieces.length} Projects</span>
+                  </div>
+                  <h3 className="work-cat-label">{cat.label}</h3>
                   <p className="work-cat-tagline">{cat.tagline}</p>
                   <div className="work-cat-stats">
                     <span className="work-cat-stat-pill">
                       {cat.pieces.length} Projects
                     </span>
                     {cat.metric && (
-                      <span className="work-cat-stat-pill">
+                      <span className="work-cat-stat-pill work-cat-stat-pill--accent">
                         {cat.metric}
                       </span>
                     )}
