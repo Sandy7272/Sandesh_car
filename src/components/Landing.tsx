@@ -13,6 +13,14 @@ const Landing = ({ children }: PropsWithChildren) => {
   return (
     <>
       <div className="landing-section" id="landingDiv">
+        <div className="landing-noise" aria-hidden="true">
+          <span className="landing-particle landing-particle-1" />
+          <span className="landing-particle landing-particle-2" />
+          <span className="landing-particle landing-particle-3" />
+          <span className="landing-particle landing-particle-4" />
+          <span className="landing-particle landing-particle-5" />
+          <span className="landing-particle landing-particle-6" />
+        </div>
         <div className="landing-container">
           <div className="landing-intro">
             <h2>Hello! I'm</h2>

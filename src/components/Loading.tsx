@@ -9,38 +9,56 @@ const Loading = ({ percent }: { percent: number }) => {
   const [loaded, setLoaded] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [clicked, setClicked] = useState(false);
-  const timersRef = useRef<number[]>([]);
+  const revealTimerRef = useRef<number>();
+  const completeTimerRef = useRef<number>();
 
-  // Move timer logic into useEffect to avoid memory leaks
   useEffect(() => {
-    if (percent >= 100 && !loaded) {
-      const t1 = window.setTimeout(() => {
-        setLoaded(true);
-        const t2 = window.setTimeout(() => {
-          setIsLoaded(true);
-        }, 1000);
-        timersRef.current.push(t2);
-      }, 600);
-      timersRef.current.push(t1);
-    }
+    if (percent < 100 || loaded) return;
+
+    revealTimerRef.current = window.setTimeout(() => {
+      setLoaded(true);
+    }, 600);
+
     return () => {
-      timersRef.current.forEach((t) => clearTimeout(t));
-      timersRef.current = [];
+      if (revealTimerRef.current) {
+        clearTimeout(revealTimerRef.current);
+      }
     };
   }, [percent, loaded]);
 
   useEffect(() => {
+    if (!loaded) return;
+
+    completeTimerRef.current = window.setTimeout(() => {
+      setIsLoaded(true);
+    }, 1000);
+
+    return () => {
+      if (completeTimerRef.current) {
+        clearTimeout(completeTimerRef.current);
+      }
+    };
+  }, [loaded]);
+
+  useEffect(() => {
     if (!isLoaded) return;
     let timer: number;
-    import("./utils/initialFX").then((module) => {
-      setClicked(true);
-      timer = window.setTimeout(() => {
-        if (module.initialFX) {
-          module.initialFX();
-        }
+    import("./utils/initialFX")
+      .then((module) => {
+        setClicked(true);
+        timer = window.setTimeout(async () => {
+          try {
+            if (module.initialFX) {
+              await module.initialFX();
+            }
+          } finally {
+            setIsLoading(false);
+          }
+        }, 900);
+      })
+      .catch(() => {
         setIsLoading(false);
-      }, 900);
-    });
+      });
     return () => {
       if (timer) clearTimeout(timer);
     };
