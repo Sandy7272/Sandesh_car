@@ -45,7 +45,9 @@ const Scene = () => {
 
       let headBone: THREE.Object3D | null = null;
       let screenLight: any | null = null;
-      let mixer: THREE.AnimationMixer;
+      let mixer: THREE.AnimationMixer | undefined;
+      let animationFrame = 0;
+      let introTimer: number | undefined;
 
       const clock = new THREE.Clock();
 
@@ -64,14 +66,11 @@ const Scene = () => {
           headBone = character.getObjectByName("spine006") || null;
           screenLight = character.getObjectByName("screenlight") || null;
           progress.loaded().then(() => {
-            setTimeout(() => {
+            introTimer = window.setTimeout(() => {
               light.turnOnLights();
               animations.startIntro();
             }, 2500);
           });
-          window.addEventListener("resize", () =>
-            handleResize(renderer, camera, canvasDiv, character)
-          );
         }
       });
 
@@ -82,12 +81,17 @@ const Scene = () => {
         handleMouseMove(event, (x, y) => (mouse = { x, y }));
       };
       let debounce: number | undefined;
+      let touchMoveHandler: ((e: TouchEvent) => void) | null = null;
+      const onResize = () => handleResize(renderer, camera, canvasDiv, character);
       const onTouchStart = (event: TouchEvent) => {
         const element = event.target as HTMLElement;
         debounce = setTimeout(() => {
-          element?.addEventListener("touchmove", (e: TouchEvent) =>
-            handleTouchMove(e, (x, y) => (mouse = { x, y }))
-          );
+          if (touchMoveHandler) {
+            element?.removeEventListener("touchmove", touchMoveHandler);
+          }
+          touchMoveHandler = (e: TouchEvent) =>
+            handleTouchMove(e, (x, y) => (mouse = { x, y }));
+          element?.addEventListener("touchmove", touchMoveHandler);
         }, 200);
       };
 
@@ -98,16 +102,15 @@ const Scene = () => {
         });
       };
 
-      document.addEventListener("mousemove", (event) => {
-        onMouseMove(event);
-      });
+      document.addEventListener("mousemove", onMouseMove);
+      window.addEventListener("resize", onResize);
       const landingDiv = document.getElementById("landingDiv");
       if (landingDiv) {
         landingDiv.addEventListener("touchstart", onTouchStart);
         landingDiv.addEventListener("touchend", onTouchEnd);
       }
       const animate = () => {
-        requestAnimationFrame(animate);
+        animationFrame = requestAnimationFrame(animate);
         if (headBone) {
           handleHeadRotation(
             headBone,
@@ -127,19 +130,23 @@ const Scene = () => {
       };
       animate();
       return () => {
+        cancelAnimationFrame(animationFrame);
         clearTimeout(debounce);
+        clearTimeout(introTimer);
         scene.clear();
         renderer.dispose();
-        window.removeEventListener("resize", () =>
-          handleResize(renderer, camera, canvasDiv, character!)
-        );
+        progress.clear();
+        window.removeEventListener("resize", onResize);
+        document.removeEventListener("mousemove", onMouseMove);
         if (canvasDiv.current) {
           canvasDiv.current.removeChild(renderer.domElement);
         }
         if (landingDiv) {
-          document.removeEventListener("mousemove", onMouseMove);
           landingDiv.removeEventListener("touchstart", onTouchStart);
           landingDiv.removeEventListener("touchend", onTouchEnd);
+          if (touchMoveHandler) {
+            landingDiv.removeEventListener("touchmove", touchMoveHandler);
+          }
         }
       };
     }
