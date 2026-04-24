@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import "./styles/Loading.css";
 import { useLoading } from "../context/LoadingProvider";
 
@@ -9,8 +9,24 @@ const Loading = ({ percent }: { percent: number }) => {
   const [loaded, setLoaded] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [clicked, setClicked] = useState(false);
+  const [hasError, setHasError] = useState(false);
   const revealTimerRef = useRef<number>();
   const completeTimerRef = useRef<number>();
+  const safetyTimerRef = useRef<number>();
+  const fxStartedRef = useRef(false);
+
+  // Global safety net: if the loader is mounted for >20s without clearing,
+  // surface the error fallback so the user is never stuck on a blank overlay.
+  useEffect(() => {
+    safetyTimerRef.current = window.setTimeout(() => {
+      if (!fxStartedRef.current) {
+        setHasError(true);
+      }
+    }, 20000);
+    return () => {
+      if (safetyTimerRef.current) clearTimeout(safetyTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (percent < 100 || loaded) return;
@@ -41,28 +57,50 @@ const Loading = ({ percent }: { percent: number }) => {
   }, [loaded]);
 
   useEffect(() => {
-    if (!isLoaded) return;
+    if (!isLoaded || hasError) return;
     let timer: number;
+    let dismissTimer: number;
+
+    // Hard fallback: even if initialFX hangs, dismiss the loader after 5s.
+    dismissTimer = window.setTimeout(() => {
+      setIsLoading(false);
+    }, 5000);
+
     import("./utils/initialFX")
       .then((module) => {
+        fxStartedRef.current = true;
         setClicked(true);
         timer = window.setTimeout(async () => {
           try {
             if (module.initialFX) {
               await module.initialFX();
             }
+          } catch (err) {
+            console.error("[Loading] initialFX failed:", err);
           } finally {
+            clearTimeout(dismissTimer);
             setIsLoading(false);
           }
         }, 900);
       })
-      .catch(() => {
-        setIsLoading(false);
+      .catch((err) => {
+        console.error("[Loading] failed to load initialFX:", err);
+        clearTimeout(dismissTimer);
+        setHasError(true);
       });
     return () => {
       if (timer) clearTimeout(timer);
+      if (dismissTimer) clearTimeout(dismissTimer);
     };
-  }, [isLoaded, setIsLoading]);
+  }, [isLoaded, setIsLoading, hasError]);
+
+  const handleRetry = useCallback(() => {
+    window.location.reload();
+  }, []);
+
+  const handleSkip = useCallback(() => {
+    setIsLoading(false);
+  }, [setIsLoading]);
 
   function handleMouseMove(e: React.MouseEvent<HTMLElement>) {
     const { currentTarget: target } = e;
@@ -71,6 +109,37 @@ const Loading = ({ percent }: { percent: number }) => {
     const y = e.clientY - rect.top;
     target.style.setProperty("--mouse-x", `${x}px`);
     target.style.setProperty("--mouse-y", `${y}px`);
+  }
+
+  if (hasError) {
+    return (
+      <div className="loading-screen loading-error">
+        <div className="loading-error-card">
+          <div className="loading-error-icon" aria-hidden>!</div>
+          <h2 className="loading-error-title">Something went wrong</h2>
+          <p className="loading-error-msg">
+            The experience couldn't finish loading. Check your connection or
+            retry.
+          </p>
+          <div className="loading-error-actions">
+            <button
+              className="loading-error-btn loading-error-btn--primary"
+              onClick={handleRetry}
+              data-cursor="disable"
+            >
+              Retry
+            </button>
+            <button
+              className="loading-error-btn"
+              onClick={handleSkip}
+              data-cursor="disable"
+            >
+              Continue anyway
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
