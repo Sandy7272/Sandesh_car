@@ -17,80 +17,128 @@ const Work = () => {
       const rect = card.getBoundingClientRect();
       const px = (e.clientX - rect.left) / rect.width;
       const py = (e.clientY - rect.top) / rect.height;
-      const x = (px - 0.5) * 8;
-      const y = (py - 0.5) * -8;
-
-      card.style.transform = `perspective(900px) rotateY(${x}deg) rotateX(${y}deg) scale3d(1.02, 1.02, 1)`;
       card.style.setProperty("--mouse-x", `${px * 100}%`);
       card.style.setProperty("--mouse-y", `${py * 100}%`);
-      card.style.willChange = "transform";
       setHoveredSlug(slug);
     },
     []
   );
 
-  const handleMouseLeave = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      e.currentTarget.style.transform = "";
-      e.currentTarget.style.willChange = "";
-      setHoveredSlug(null);
-    },
-    []
-  );
+  const handleMouseLeave = useCallback(() => {
+    setHoveredSlug(null);
+  }, []);
 
   useEffect(() => {
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReduced) return;
 
-    const cards = sectionRef.current?.querySelectorAll(".work-cat-card");
-    if (!cards) return;
+    const els = sectionRef.current?.querySelectorAll(".work-row, .work-feature");
+    if (!els) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            (entry.target as HTMLElement).classList.add("work-cat-card--visible");
+            (entry.target as HTMLElement).classList.add("is-visible");
             observer.unobserve(entry.target);
           }
         });
       },
-      { threshold: 0.15 }
+      { threshold: 0.12 }
     );
-    cards.forEach((c) => observer.observe(c));
+    els.forEach((c) => observer.observe(c));
     return () => observer.disconnect();
   }, []);
 
-  // Sort: featured first
-  const sortedCategories = [...workCategories].sort((a, b) => {
+  // Featured first
+  const sorted = [...workCategories].sort((a, b) => {
     if (a.featured && !b.featured) return -1;
     if (!a.featured && b.featured) return 1;
     return 0;
   });
 
+  const featured = sorted.find((c) => c.featured);
+  const rest = sorted.filter((c) => !c.featured);
+
+  const totalProjects = workCategories.reduce((sum, c) => sum + c.pieces.length, 0);
+
   return (
     <div className="work-section" id="work" ref={sectionRef}>
       <div className="work-container section-container">
+        {/* Editorial Header */}
         <div className="work-header">
-          <span className="work-kicker">Portfolio</span>
-          <h2>
-            My <span>Work</span>
+          <div className="work-header-top">
+            <span className="work-kicker">
+              <span className="work-kicker-dot" /> Selected Work · 2024 — 2025
+            </span>
+            <span className="work-header-meta">
+              {workCategories.length} Categories · {totalProjects} Projects
+            </span>
+          </div>
+          <h2 className="work-title">
+            Work that <em>moves</em><br />
+            people, pixels & <span>polygons</span>.
           </h2>
-          <p className="work-subtitle">
-            From concept to production — explore projects across 3D, motion, code, and design.
-          </p>
         </div>
 
-        <div className="work-cat-grid">
-          {sortedCategories.map((cat, i) => {
-            const isHovered = hoveredSlug === cat.slug;
+        {/* FEATURED — wide cinematic block */}
+        {featured && (
+          <div
+            className="work-feature"
+            style={{ ["--cat-accent" as string]: featured.accent } as React.CSSProperties}
+            onMouseMove={(e) => handleMouseMove(e, featured.slug)}
+            onMouseLeave={handleMouseLeave}
+            onClick={() => openCategory(featured.slug)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === "Enter" && openCategory(featured.slug)}
+            data-cursor="disable"
+          >
+            <div className="work-feature-glow" style={{ opacity: hoveredSlug === featured.slug ? 1 : 0 }} />
+
+            <div className="work-feature-media">
+              {featured.pieces.slice(0, 3).map((p, j) => (
+                <div className={`work-feature-thumb work-feature-thumb--${j}`} key={p.id}>
+                  <img src={p.thumbnail} alt={p.title} loading="lazy" />
+                </div>
+              ))}
+              <div className="work-feature-vignette" />
+            </div>
+
+            <div className="work-feature-content">
+              <div className="work-feature-badge">
+                <span className="work-feature-pulse" />
+                Featured Case
+              </div>
+              <h3 className="work-feature-title">
+                <span className="work-feature-icon">{featured.icon}</span>
+                {featured.label}
+              </h3>
+              <p className="work-feature-tagline">{featured.tagline}</p>
+              <div className="work-feature-meta">
+                <span>{featured.pieces.length} Projects</span>
+                {featured.metric && <span className="dot">·</span>}
+                {featured.metric && <span className="accent">{featured.metric}</span>}
+              </div>
+              <button className="work-feature-cta" tabIndex={-1}>
+                Explore Case <MdArrowOutward />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* EDITORIAL LIST — numbered rows */}
+        <div className="work-list">
+          {rest.map((cat, i) => {
+            const isHover = hoveredSlug === cat.slug;
             return (
               <div
-                className={`work-cat-card ${cat.featured ? "work-cat-card--featured" : ""}`}
+                className="work-row"
                 key={cat.slug}
                 style={
                   {
                     "--cat-accent": cat.accent,
-                    "--cat-delay": `${i * 0.12}s`,
+                    "--row-delay": `${i * 0.08}s`,
                   } as React.CSSProperties
                 }
                 onMouseMove={(e) => handleMouseMove(e, cat.slug)}
@@ -101,52 +149,37 @@ const Work = () => {
                 onKeyDown={(e) => e.key === "Enter" && openCategory(cat.slug)}
                 data-cursor="disable"
               >
-                <div
-                  className="work-cat-glow"
-                  style={{ opacity: isHovered ? 1 : 0 }}
-                />
+                <div className="work-row-num">0{i + 2}</div>
 
-                {cat.featured && (
-                  <div className="work-cat-featured-badge">★ FEATURED</div>
-                )}
+                <div className="work-row-main">
+                  <div className="work-row-head">
+                    <span className="work-row-icon">{cat.icon}</span>
+                    <h3 className="work-row-label">{cat.label}</h3>
+                    <span className="work-row-count">/ {cat.pieces.length} Projects</span>
+                  </div>
+                  <p className="work-row-tagline">{cat.tagline}</p>
+                  {cat.metric && <span className="work-row-metric">{cat.metric}</span>}
+                </div>
 
-                {/* Mosaic thumbnails */}
-                <div className="work-cat-mosaic">
+                {/* Peek thumbnails — appear on hover */}
+                <div className="work-row-peek">
                   {cat.pieces.slice(0, 3).map((p, j) => (
                     <div
-                      className={`work-cat-thumb work-cat-thumb--${j}`}
+                      className={`work-row-peek-thumb peek-${j}`}
                       key={p.id}
+                      style={{ transitionDelay: isHover ? `${j * 60}ms` : "0ms" }}
                     >
                       <img src={p.thumbnail} alt={p.title} loading="lazy" />
                     </div>
                   ))}
-                  {/* Gradient overlay */}
-                  <div className="work-cat-mosaic-overlay" />
                 </div>
 
-                {/* Info */}
-                <div className="work-cat-info">
-                  <div className="work-cat-info-top">
-                    <span className="work-cat-icon">{cat.icon}</span>
-                    <span className="work-cat-count">{cat.pieces.length} Projects</span>
-                  </div>
-                  <h3 className="work-cat-label">{cat.label}</h3>
-                  <p className="work-cat-tagline">{cat.tagline}</p>
-                  <div className="work-cat-stats">
-                    <span className="work-cat-stat-pill">
-                      {cat.pieces.length} Projects
-                    </span>
-                    {cat.metric && (
-                      <span className="work-cat-stat-pill work-cat-stat-pill--accent">
-                        {cat.metric}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="work-cat-arrow">
+                <div className="work-row-arrow">
                   <MdArrowOutward />
                 </div>
+
+                {/* Animated bottom border */}
+                <span className="work-row-line" />
               </div>
             );
           })}
