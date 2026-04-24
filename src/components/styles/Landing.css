@@ -4,6 +4,72 @@
   margin: auto;
   position: relative;
   height: var(--vh);
+  overflow: clip;
+}
+
+.landing-noise {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.landing-noise::before,
+.landing-noise::after {
+  content: "";
+  position: absolute;
+  inset: -10%;
+}
+
+.landing-noise::before {
+  background-image:
+    radial-gradient(circle at 20% 25%, color-mix(in srgb, var(--accentColor) 18%, transparent) 0%, transparent 38%),
+    radial-gradient(circle at 78% 18%, rgba(147, 51, 234, 0.14) 0%, transparent 34%),
+    radial-gradient(circle at 72% 75%, rgba(255, 255, 255, 0.06) 0%, transparent 28%);
+  filter: blur(38px);
+  opacity: 0.8;
+}
+
+.landing-noise::after {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.08) 0.6px, transparent 0.7px);
+  background-size: 180px 180px, 180px 180px, 12px 12px;
+  mix-blend-mode: screen;
+  opacity: 0.14;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.6), transparent 92%);
+}
+
+.landing-particle {
+  position: absolute;
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accentColor) 70%, white 30%);
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accentColor) 35%, transparent);
+  opacity: 0.28;
+  animation: landingFloat 12s ease-in-out infinite;
+}
+
+.landing-particle-1 { top: 16%; left: 14%; animation-delay: 0s; }
+.landing-particle-2 { top: 28%; right: 18%; width: 8px; height: 8px; animation-delay: -2s; }
+.landing-particle-3 { top: 52%; left: 10%; width: 4px; height: 4px; animation-delay: -4s; }
+.landing-particle-4 { top: 64%; right: 24%; animation-delay: -6s; }
+.landing-particle-5 { top: 38%; left: 48%; width: 5px; height: 5px; animation-delay: -8s; }
+.landing-particle-6 { top: 78%; left: 62%; width: 7px; height: 7px; animation-delay: -10s; }
+
+@keyframes landingFloat {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translate3d(0, -16px, 0) scale(1.15);
+    opacity: 0.42;
+  }
 }
 
 .landing-container {
@@ -12,6 +78,7 @@
   height: 100%;
   position: relative;
   max-width: var(--cMaxWidth);
+  z-index: 2;
 }
 
 .landing-circle1 {
