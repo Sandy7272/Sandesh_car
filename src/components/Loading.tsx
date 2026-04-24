@@ -46,11 +46,14 @@ const Loading = ({ percent }: { percent: number }) => {
     import("./utils/initialFX")
       .then((module) => {
         setClicked(true);
-        timer = window.setTimeout(() => {
-          if (module.initialFX) {
-            module.initialFX();
+        timer = window.setTimeout(async () => {
+          try {
+            if (module.initialFX) {
+              await module.initialFX();
+            }
+          } finally {
+            setIsLoading(false);
           }
-          setIsLoading(false);
         }, 900);
       })
       .catch(() => {
