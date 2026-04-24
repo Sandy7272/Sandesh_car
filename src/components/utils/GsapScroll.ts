@@ -133,6 +133,10 @@ export function setCharTimeline(
 }
 
 export function setAllTimeline() {
+  if (!document.querySelector(".career-section") || !document.querySelector(".career-info-box")) {
+    return;
+  }
+
   const careerTimeline = gsap.timeline({
     scrollTrigger: {
       trigger: ".career-section",
@@ -144,14 +148,14 @@ export function setAllTimeline() {
   });
   careerTimeline
     .fromTo(
-      ".career-timeline",
+      ".career-timeline-line",
       { maxHeight: "10%" },
       { maxHeight: "100%", duration: 0.5 },
       0
     )
 
     .fromTo(
-      ".career-timeline",
+      ".career-timeline-line",
       { opacity: 0 },
       { opacity: 1, duration: 0.1 },
       0
